@@ -44,6 +44,8 @@ export function CheckoutForm({
         currency: selected.currency,
         customer: { email },
         description: "Sanwo example payment",
+        onLoad: () => console.log("Sanwo: checkout loaded"),
+        onError: (err) => console.log("Sanwo: checkout error", err),
         sanwoProviderOptions: selected.sanwoProviderOptions,
       });
     } catch {

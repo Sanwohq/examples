@@ -183,10 +183,20 @@ const groupedScenarios = computed(() => {
 
 function buildSanwoInstance(scenarioKey: ScenarioKey) {
   const config = scenarios[scenarioKey];
-  return createSanwo({
+  const instance = createSanwo({
     provider: config.provider,
     publicKey: config.publicKey,
   });
+
+  instance.on("started", (event) => console.log("Sanwo: started", event));
+  instance.on("opened", (event) => console.log("Sanwo: opened", event));
+  instance.on("loaded", (event) => console.log("Sanwo: loaded", event));
+  instance.on("success", (event) => console.log("Sanwo: success", event));
+  instance.on("cancelled", (event) => console.log("Sanwo: cancelled", event));
+  instance.on("failed", (event) => console.log("Sanwo: failed", event));
+  instance.on("closed", (event) => console.log("Sanwo: closed", event));
+
+  return instance;
 }
 
 const sanwo = ref(buildSanwoInstance(selectedScenario.value));
@@ -214,6 +224,8 @@ async function handlePayment() {
         email: email.value,
       },
       description: "Sanwo example payment",
+      onLoad: () => console.log("Sanwo: onLoad callback fired"),
+      onError: (err) => console.log("Sanwo: onError callback fired", err),
       ...(Object.keys(config.sanwoProviderOptions).length > 0
         ? { sanwoProviderOptions: config.sanwoProviderOptions }
         : {}),

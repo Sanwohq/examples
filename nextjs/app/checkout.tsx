@@ -192,14 +192,22 @@ export default function Checkout() {
 
   const selected = SCENARIOS.find((s) => s.id === selectedId) ?? SCENARIOS[0];
 
-  const sanwo = useMemo(
-    () =>
-      createSanwo({
-        provider: selected.provider,
-        publicKey: selected.publicKey,
-      }),
-    [selectedId],
-  );
+  const sanwo = useMemo(() => {
+    const instance = createSanwo({
+      provider: selected.provider,
+      publicKey: selected.publicKey,
+    });
+
+    instance.on("started", (event) => console.log("Sanwo: started", event));
+    instance.on("opened", (event) => console.log("Sanwo: opened", event));
+    instance.on("loaded", (event) => console.log("Sanwo: loaded", event));
+    instance.on("success", (event) => console.log("Sanwo: success", event));
+    instance.on("cancelled", (event) => console.log("Sanwo: cancelled", event));
+    instance.on("failed", (event) => console.log("Sanwo: failed", event));
+    instance.on("closed", (event) => console.log("Sanwo: closed", event));
+
+    return instance;
+  }, [selectedId]);
 
   async function handlePay(e: React.FormEvent) {
     e.preventDefault();
@@ -212,6 +220,8 @@ export default function Checkout() {
         currency: selected.currency,
         customer: { email },
         description: "Sanwo example payment",
+        onLoad: () => console.log("Sanwo: onLoad callback fired"),
+        onError: (err) => console.log("Sanwo: onError callback fired", err),
         ...(Object.keys(selected.sanwoProviderOptions).length > 0 && {
           sanwoProviderOptions: selected.sanwoProviderOptions,
         }),

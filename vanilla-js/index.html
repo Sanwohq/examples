@@ -381,6 +381,28 @@
           publicKey: config.publicKey,
         });
 
+        sanwo.on("started", (event) => {
+          console.log("Sanwo: checkout started", event);
+        });
+        sanwo.on("opened", (event) => {
+          console.log("Sanwo: checkout opened", event);
+        });
+        sanwo.on("loaded", (event) => {
+          console.log("Sanwo: provider SDK loaded", event);
+        });
+        sanwo.on("success", (event) => {
+          console.log("Sanwo: payment successful", event);
+        });
+        sanwo.on("cancelled", (event) => {
+          console.log("Sanwo: payment cancelled", event);
+        });
+        sanwo.on("failed", (event) => {
+          console.log("Sanwo: payment failed", event);
+        });
+        sanwo.on("closed", (event) => {
+          console.log("Sanwo: checkout closed", event);
+        });
+
         const amount = Math.round(amountInput * 100);
 
         payBtn.disabled = true;
@@ -393,6 +415,8 @@
             currency: config.currency,
             customer: { email },
             description: "Sanwo example payment",
+            onLoad: () => console.log("Sanwo: onLoad callback fired"),
+            onError: (err) => console.log("Sanwo: onError callback fired", err),
             sanwoProviderOptions: config.sanwoProviderOptions,
           });
 
