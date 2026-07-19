@@ -18,6 +18,7 @@ function buildProviderOptions(providerId: string): Record<string, unknown> {
     case "monnify":
       return {
         contractCode: import.meta.env.VITE_MONNIFY_CONTRACT_CODE ?? "",
+        isTestMode: true,
       };
     case "interswitch":
       return {

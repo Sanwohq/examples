@@ -3,7 +3,6 @@ import { SanwoReactProvider } from "@sanwohq/react";
 import type { SanwoProviderDefinition } from "@sanwohq/types";
 import { paystackProvider } from "@sanwohq/paystack";
 import { flutterwaveProvider } from "@sanwohq/flutterwave";
-import { stripeProvider } from "@sanwohq/stripe";
 import { paypalProvider } from "@sanwohq/paypal";
 import { razorpayProvider } from "@sanwohq/razorpay";
 import { monnifyProvider } from "@sanwohq/monnify";
@@ -34,14 +33,7 @@ export const PROVIDERS: ProviderConfig[] = [
     publicKey: import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY ?? "",
     currency: "NGN",
   },
-  {
-    id: "stripe",
-    label: "Stripe",
-    provider: stripeProvider,
-    publicKey: import.meta.env.VITE_STRIPE_PUBLIC_KEY ?? "",
-    currency: "USD",
-  },
-  {
+{
     id: "paypal",
     label: "PayPal",
     provider: paypalProvider,

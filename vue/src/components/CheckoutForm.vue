@@ -3,7 +3,6 @@ import { ref, computed, watch } from "vue";
 import { createSanwo } from "@sanwohq/web";
 import { paystackProvider } from "@sanwohq/paystack";
 import { flutterwaveProvider } from "@sanwohq/flutterwave";
-import { stripeProvider } from "@sanwohq/stripe";
 import { paypalProvider } from "@sanwohq/paypal";
 import { razorpayProvider } from "@sanwohq/razorpay";
 import { monnifyProvider } from "@sanwohq/monnify";
@@ -14,7 +13,6 @@ import type { CheckoutResult } from "@sanwohq/types";
 type ProviderKey =
   | "paystack"
   | "flutterwave"
-  | "stripe"
   | "paypal"
   | "razorpay"
   | "monnify"
@@ -40,12 +38,6 @@ const providers: Record<ProviderKey, ProviderConfig> = {
     provider: flutterwaveProvider,
     envKey: "VITE_FLUTTERWAVE_PUBLIC_KEY",
     currency: "NGN",
-  },
-  stripe: {
-    label: "Stripe",
-    provider: stripeProvider,
-    envKey: "VITE_STRIPE_PUBLIC_KEY",
-    currency: "USD",
   },
   paypal: {
     label: "PayPal",
@@ -110,12 +102,13 @@ watch(selectedProvider, (newProvider) => {
   result.value = null;
 });
 
-function getSanwoProviderOptions(providerKey: ProviderKey): Record<string, string> | undefined {
+function getSanwoProviderOptions(providerKey: ProviderKey): Record<string, string | boolean> | undefined {
   if (providerKey === "monnify") {
     const contractCode = import.meta.env.VITE_MONNIFY_CONTRACT_CODE as string;
     if (contractCode) {
-      return { contractCode };
+      return { contractCode, isTestMode: true };
     }
+    return { isTestMode: true };
   }
   if (providerKey === "interswitch") {
     const payItemId = import.meta.env.VITE_INTERSWITCH_PAY_ITEM_ID as string;

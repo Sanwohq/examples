@@ -4,7 +4,6 @@ import { useState, useMemo } from "react";
 import { createSanwo } from "@sanwohq/web";
 import { paystackProvider } from "@sanwohq/paystack";
 import { flutterwaveProvider } from "@sanwohq/flutterwave";
-import { stripeProvider } from "@sanwohq/stripe";
 import { paypalProvider } from "@sanwohq/paypal";
 import { razorpayProvider } from "@sanwohq/razorpay";
 import { monnifyProvider } from "@sanwohq/monnify";
@@ -26,12 +25,6 @@ const PROVIDERS = [
     currency: "NGN",
   },
   {
-    label: "Stripe",
-    provider: stripeProvider,
-    publicKey: process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY ?? "",
-    currency: "USD",
-  },
-  {
     label: "PayPal",
     provider: paypalProvider,
     publicKey: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ?? "",
@@ -50,6 +43,7 @@ const PROVIDERS = [
     currency: "NGN",
     providerOptions: {
       contractCode: process.env.NEXT_PUBLIC_MONNIFY_CONTRACT_CODE ?? "",
+      isTestMode: true,
     },
   },
   {
