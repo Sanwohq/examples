@@ -17,9 +17,7 @@
     "@sanwohq/paystack": "latest",
     "@sanwohq/razorpay": "latest",
     "@sanwohq/react": "latest",
-    "@sanwohq/stripe": "latest",
     "@sanwohq/types": "latest",
-    "@sanwohq/yoco": "latest",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

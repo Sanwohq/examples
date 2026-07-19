@@ -6,7 +6,6 @@ import { flutterwaveProvider } from "@sanwohq/flutterwave";
 import { paypalProvider } from "@sanwohq/paypal";
 import { razorpayProvider } from "@sanwohq/razorpay";
 import { monnifyProvider } from "@sanwohq/monnify";
-import { yocoProvider } from "@sanwohq/yoco";
 import { interswitchProvider } from "@sanwohq/interswitch";
 import { CheckoutForm } from "./CheckoutForm";
 
@@ -151,18 +150,6 @@ export const SCENARIOS: ScenarioConfig[] = [
       isTestMode: true,
       paymentMethods: ["ACCOUNT_TRANSFER"],
     },
-  },
-
-  // ── Yoco ──────────────────────────────────────────────────
-  {
-    id: "yoco-standard",
-    label: "Yoco — Standard",
-    description: "Standard Yoco checkout",
-    group: "Yoco",
-    provider: yocoProvider,
-    publicKey: import.meta.env.VITE_YOCO_PUBLIC_KEY ?? "",
-    currency: "ZAR",
-    sanwoProviderOptions: {},
   },
 
   // ── Interswitch ───────────────────────────────────────────

@@ -168,9 +168,6 @@
             <option value="monnify-card-only">Monnify — Card Only</option>
             <option value="monnify-transfer-only">Monnify — Bank Transfer Only</option>
           </optgroup>
-          <optgroup label="Yoco">
-            <option value="yoco-standard">Yoco — Standard</option>
-          </optgroup>
           <optgroup label="Interswitch">
             <option value="interswitch-standard">Interswitch — Standard</option>
           </optgroup>
@@ -212,7 +209,6 @@
       import { paypalProvider } from "@sanwohq/paypal";
       import { razorpayProvider } from "@sanwohq/razorpay";
       import { monnifyProvider } from "@sanwohq/monnify";
-      import { yocoProvider } from "@sanwohq/yoco";
       import { interswitchProvider } from "@sanwohq/interswitch";
 
       const scenarios = {
@@ -331,16 +327,6 @@
             isTestMode: true,
             paymentMethods: ["ACCOUNT_TRANSFER"],
           },
-        },
-
-        // --- Yoco ---
-        "yoco-standard": {
-          provider: yocoProvider,
-          publicKey: import.meta.env.VITE_YOCO_PUBLIC_KEY,
-          currency: "ZAR",
-          label: "Yoco",
-          description: "Standard Yoco card checkout for South Africa.",
-          sanwoProviderOptions: {},
         },
 
         // --- Interswitch ---

@@ -15,10 +15,8 @@
     "@sanwohq/paypal": "latest",
     "@sanwohq/paystack": "latest",
     "@sanwohq/razorpay": "latest",
-    "@sanwohq/stripe": "latest",
     "@sanwohq/types": "latest",
     "@sanwohq/web": "latest",
-    "@sanwohq/yoco": "latest",
     "next": "^14.2.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0"

@@ -15,9 +15,7 @@
     "@sanwohq/paypal": "^0.1.0",
     "@sanwohq/paystack": "latest",
     "@sanwohq/razorpay": "latest",
-    "@sanwohq/stripe": "latest",
-    "@sanwohq/web": "latest",
-    "@sanwohq/yoco": "latest"
+    "@sanwohq/web": "latest"
   },
   "devDependencies": {
     "vite": "^6.0.0"
