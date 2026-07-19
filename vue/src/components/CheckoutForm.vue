@@ -10,68 +10,165 @@ import { yocoProvider } from "@sanwohq/yoco";
 import { interswitchProvider } from "@sanwohq/interswitch";
 import type { CheckoutResult } from "@sanwohq/types";
 
-type ProviderKey =
-  | "paystack"
-  | "flutterwave"
-  | "paypal"
-  | "razorpay"
-  | "monnify"
-  | "yoco"
-  | "interswitch";
-
-interface ProviderConfig {
+interface ScenarioConfig {
   label: string;
+  group: string;
+  description: string;
   provider: typeof paystackProvider;
-  envKey: string;
+  publicKey: string;
   currency: string;
+  sanwoProviderOptions: Record<string, unknown>;
 }
 
-const providers: Record<ProviderKey, ProviderConfig> = {
-  paystack: {
-    label: "Paystack",
+const scenarios: Record<string, ScenarioConfig> = {
+  // Paystack scenarios
+  "paystack-checkout": {
+    label: "Paystack — Checkout",
+    group: "Paystack",
+    description: "Standard Paystack checkout with all payment methods",
     provider: paystackProvider,
-    envKey: "VITE_PAYSTACK_PUBLIC_KEY",
+    publicKey: (import.meta.env.VITE_PAYSTACK_PUBLIC_KEY as string) || "",
     currency: "NGN",
+    sanwoProviderOptions: { method: "checkout" },
   },
-  flutterwave: {
-    label: "Flutterwave",
+  "paystack-new-transaction": {
+    label: "Paystack — New Transaction",
+    group: "Paystack",
+    description: "Paystack new transaction flow",
+    provider: paystackProvider,
+    publicKey: (import.meta.env.VITE_PAYSTACK_PUBLIC_KEY as string) || "",
+    currency: "NGN",
+    sanwoProviderOptions: { method: "newTransaction" },
+  },
+  "paystack-card-only": {
+    label: "Paystack — Card Only",
+    group: "Paystack",
+    description: "Paystack checkout restricted to card payments only",
+    provider: paystackProvider,
+    publicKey: (import.meta.env.VITE_PAYSTACK_PUBLIC_KEY as string) || "",
+    currency: "NGN",
+    sanwoProviderOptions: { method: "checkout", channels: ["card"] },
+  },
+  "paystack-bank-transfer": {
+    label: "Paystack — Bank Transfer",
+    group: "Paystack",
+    description: "Paystack checkout restricted to bank transfer only",
+    provider: paystackProvider,
+    publicKey: (import.meta.env.VITE_PAYSTACK_PUBLIC_KEY as string) || "",
+    currency: "NGN",
+    sanwoProviderOptions: { method: "checkout", channels: ["bank_transfer"] },
+  },
+
+  // Flutterwave scenarios
+  "flutterwave-standard": {
+    label: "Flutterwave — Standard",
+    group: "Flutterwave",
+    description: "Standard Flutterwave checkout with all payment options",
     provider: flutterwaveProvider,
-    envKey: "VITE_FLUTTERWAVE_PUBLIC_KEY",
+    publicKey: (import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY as string) || "",
     currency: "NGN",
+    sanwoProviderOptions: {},
   },
-  paypal: {
-    label: "PayPal",
+  "flutterwave-card-only": {
+    label: "Flutterwave — Card Only",
+    group: "Flutterwave",
+    description: "Flutterwave checkout restricted to card payments only",
+    provider: flutterwaveProvider,
+    publicKey: (import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY as string) || "",
+    currency: "NGN",
+    sanwoProviderOptions: { paymentOptions: "card" },
+  },
+
+  // PayPal scenarios
+  "paypal-standard": {
+    label: "PayPal — Standard",
+    group: "PayPal",
+    description: "Standard PayPal checkout",
     provider: paypalProvider,
-    envKey: "VITE_PAYPAL_CLIENT_ID",
+    publicKey: (import.meta.env.VITE_PAYPAL_CLIENT_ID as string) || "",
     currency: "USD",
+    sanwoProviderOptions: {},
   },
-  razorpay: {
-    label: "Razorpay",
+
+  // Razorpay scenarios
+  "razorpay-standard": {
+    label: "Razorpay — Standard",
+    group: "Razorpay",
+    description: "Standard Razorpay checkout",
     provider: razorpayProvider,
-    envKey: "VITE_RAZORPAY_KEY_ID",
+    publicKey: (import.meta.env.VITE_RAZORPAY_KEY_ID as string) || "",
     currency: "INR",
+    sanwoProviderOptions: {},
   },
-  monnify: {
-    label: "Monnify",
+
+  // Monnify scenarios
+  "monnify-standard": {
+    label: "Monnify — Standard",
+    group: "Monnify",
+    description: "Standard Monnify checkout with all payment methods",
     provider: monnifyProvider,
-    envKey: "VITE_MONNIFY_API_KEY",
+    publicKey: (import.meta.env.VITE_MONNIFY_API_KEY as string) || "",
     currency: "NGN",
+    sanwoProviderOptions: {
+      contractCode: (import.meta.env.VITE_MONNIFY_CONTRACT_CODE as string) || "",
+      isTestMode: true,
+    },
   },
-  yoco: {
-    label: "Yoco",
+  "monnify-card-only": {
+    label: "Monnify — Card Only",
+    group: "Monnify",
+    description: "Monnify checkout restricted to card payments only",
+    provider: monnifyProvider,
+    publicKey: (import.meta.env.VITE_MONNIFY_API_KEY as string) || "",
+    currency: "NGN",
+    sanwoProviderOptions: {
+      contractCode: (import.meta.env.VITE_MONNIFY_CONTRACT_CODE as string) || "",
+      isTestMode: true,
+      paymentMethods: ["CARD"],
+    },
+  },
+  "monnify-bank-transfer": {
+    label: "Monnify — Bank Transfer Only",
+    group: "Monnify",
+    description: "Monnify checkout restricted to bank transfer only",
+    provider: monnifyProvider,
+    publicKey: (import.meta.env.VITE_MONNIFY_API_KEY as string) || "",
+    currency: "NGN",
+    sanwoProviderOptions: {
+      contractCode: (import.meta.env.VITE_MONNIFY_CONTRACT_CODE as string) || "",
+      isTestMode: true,
+      paymentMethods: ["ACCOUNT_TRANSFER"],
+    },
+  },
+
+  // Yoco scenarios
+  "yoco-standard": {
+    label: "Yoco — Standard",
+    group: "Yoco",
+    description: "Standard Yoco checkout",
     provider: yocoProvider,
-    envKey: "VITE_YOCO_PUBLIC_KEY",
+    publicKey: (import.meta.env.VITE_YOCO_PUBLIC_KEY as string) || "",
     currency: "ZAR",
+    sanwoProviderOptions: {},
   },
-  interswitch: {
-    label: "Interswitch",
+
+  // Interswitch scenarios
+  "interswitch-standard": {
+    label: "Interswitch — Standard",
+    group: "Interswitch",
+    description: "Standard Interswitch checkout",
     provider: interswitchProvider,
-    envKey: "VITE_INTERSWITCH_MERCHANT_CODE",
+    publicKey: (import.meta.env.VITE_INTERSWITCH_MERCHANT_CODE as string) || "",
     currency: "NGN",
+    sanwoProviderOptions: {
+      payItemId: (import.meta.env.VITE_INTERSWITCH_PAY_ITEM_ID as string) || "",
+    },
   },
 };
 
-const selectedProvider = ref<ProviderKey>("paystack");
+type ScenarioKey = keyof typeof scenarios;
+
+const selectedScenario = ref<ScenarioKey>("paystack-checkout");
 const email = ref("");
 const amount = ref<number | undefined>();
 const loading = ref(false);
@@ -80,44 +177,36 @@ const result = ref<{
   message: string;
 } | null>(null);
 
-const currentCurrency = computed(() => providers[selectedProvider.value].currency);
+const currentConfig = computed(() => scenarios[selectedScenario.value]);
+const currentCurrency = computed(() => currentConfig.value.currency);
+const scenarioDescription = computed(() => currentConfig.value.description);
 
-function getPublicKey(providerKey: ProviderKey): string {
-  const envKey = providers[providerKey].envKey;
-  return (import.meta.env[envKey] as string) || "";
-}
+// Group scenarios by provider for <optgroup> rendering
+const groupedScenarios = computed(() => {
+  const groups: Record<string, { key: string; label: string }[]> = {};
+  for (const [key, config] of Object.entries(scenarios)) {
+    if (!groups[config.group]) {
+      groups[config.group] = [];
+    }
+    groups[config.group].push({ key, label: config.label });
+  }
+  return groups;
+});
 
-function buildSanwoInstance(providerKey: ProviderKey) {
-  const config = providers[providerKey];
+function buildSanwoInstance(scenarioKey: ScenarioKey) {
+  const config = scenarios[scenarioKey];
   return createSanwo({
     provider: config.provider,
-    publicKey: getPublicKey(providerKey),
+    publicKey: config.publicKey,
   });
 }
 
-const sanwo = ref(buildSanwoInstance(selectedProvider.value));
+const sanwo = ref(buildSanwoInstance(selectedScenario.value));
 
-watch(selectedProvider, (newProvider) => {
-  sanwo.value = buildSanwoInstance(newProvider);
+watch(selectedScenario, (newScenario) => {
+  sanwo.value = buildSanwoInstance(newScenario);
   result.value = null;
 });
-
-function getSanwoProviderOptions(providerKey: ProviderKey): Record<string, string | boolean> | undefined {
-  if (providerKey === "monnify") {
-    const contractCode = import.meta.env.VITE_MONNIFY_CONTRACT_CODE as string;
-    if (contractCode) {
-      return { contractCode, isTestMode: true };
-    }
-    return { isTestMode: true };
-  }
-  if (providerKey === "interswitch") {
-    const payItemId = import.meta.env.VITE_INTERSWITCH_PAY_ITEM_ID as string;
-    if (payItemId) {
-      return { payItemId };
-    }
-  }
-  return undefined;
-}
 
 async function handlePayment() {
   if (!email.value || !amount.value) return;
@@ -128,16 +217,18 @@ async function handlePayment() {
   result.value = null;
 
   try {
-    const providerOptions = getSanwoProviderOptions(selectedProvider.value);
+    const config = currentConfig.value;
 
     const response: CheckoutResult = await sanwo.value({
       amount: amountInMinorUnits,
-      currency: currentCurrency.value,
+      currency: config.currency,
       customer: {
         email: email.value,
       },
       description: "Sanwo example payment",
-      ...(providerOptions ? { sanwoProviderOptions: providerOptions } : {}),
+      ...(Object.keys(config.sanwoProviderOptions).length > 0
+        ? { sanwoProviderOptions: config.sanwoProviderOptions }
+        : {}),
     });
 
     if (response.status === "successful") {
@@ -173,16 +264,23 @@ async function handlePayment() {
     <p class="subtitle">Vue 3 example with multiple providers</p>
 
     <form @submit.prevent="handlePayment">
-      <label for="provider">Payment Provider</label>
-      <select id="provider" v-model="selectedProvider">
-        <option
-          v-for="(config, key) in providers"
-          :key="key"
-          :value="key"
+      <label for="scenario">Payment Scenario</label>
+      <select id="scenario" v-model="selectedScenario">
+        <optgroup
+          v-for="(items, group) in groupedScenarios"
+          :key="group"
+          :label="group"
         >
-          {{ config.label }}
-        </option>
+          <option
+            v-for="item in items"
+            :key="item.key"
+            :value="item.key"
+          >
+            {{ item.label }}
+          </option>
+        </optgroup>
       </select>
+      <p class="scenario-description">{{ scenarioDescription }}</p>
 
       <label for="email">Email</label>
       <input
@@ -205,7 +303,7 @@ async function handlePayment() {
       />
 
       <button type="submit" :disabled="loading">
-        {{ loading ? "Processing..." : `Pay with ${providers[selectedProvider].label}` }}
+        {{ loading ? "Processing..." : `Pay with ${currentConfig.group}` }}
       </button>
     </form>
 
@@ -234,6 +332,14 @@ h1 {
   color: #666;
   font-size: 0.9rem;
   margin-bottom: 24px;
+}
+
+.scenario-description {
+  color: #888;
+  font-size: 0.8rem;
+  margin-top: -8px;
+  margin-bottom: 16px;
+  font-style: italic;
 }
 
 label {

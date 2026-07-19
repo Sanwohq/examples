@@ -30,7 +30,7 @@
         box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
         padding: 40px;
         width: 100%;
-        max-width: 420px;
+        max-width: 460px;
       }
 
       h1 {
@@ -68,6 +68,13 @@
       input:focus {
         outline: none;
         border-color: #4f46e5;
+      }
+
+      .scenario-desc {
+        font-size: 0.8rem;
+        color: #888;
+        margin: -12px 0 16px;
+        line-height: 1.4;
       }
 
       button {
@@ -123,24 +130,54 @@
         color: #1e40af;
         border: 1px solid #bfdbfe;
       }
+
+      optgroup {
+        font-weight: 700;
+        color: #333;
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <h1>Sanwo Payment</h1>
-      <p class="subtitle">Vanilla JS example with all payment providers</p>
+      <p class="subtitle">
+        Vanilla JS example — all providers and scenarios
+      </p>
 
       <form id="payment-form">
-        <label for="provider">Payment Provider</label>
-        <select id="provider" required>
-          <option value="paystack">Paystack</option>
-          <option value="flutterwave">Flutterwave</option>
-          <option value="paypal">PayPal</option>
-          <option value="razorpay">Razorpay</option>
-          <option value="monnify">Monnify</option>
-          <option value="yoco">Yoco</option>
-          <option value="interswitch">Interswitch</option>
+        <label for="scenario">Payment Scenario</label>
+        <select id="scenario" required>
+          <optgroup label="Paystack">
+            <option value="paystack-checkout">Paystack — Checkout (default)</option>
+            <option value="paystack-new-transaction">Paystack — New Transaction</option>
+            <option value="paystack-card-only">Paystack — Card Only</option>
+            <option value="paystack-bank-transfer">Paystack — Bank Transfer</option>
+          </optgroup>
+          <optgroup label="Flutterwave">
+            <option value="flutterwave-standard">Flutterwave — Standard</option>
+            <option value="flutterwave-card-only">Flutterwave — Card Only</option>
+          </optgroup>
+          <optgroup label="PayPal">
+            <option value="paypal-standard">PayPal — Standard</option>
+          </optgroup>
+          <optgroup label="Razorpay">
+            <option value="razorpay-standard">Razorpay — Standard</option>
+          </optgroup>
+          <optgroup label="Monnify">
+            <option value="monnify-standard">Monnify — Standard</option>
+            <option value="monnify-card-only">Monnify — Card Only</option>
+            <option value="monnify-transfer-only">Monnify — Bank Transfer Only</option>
+          </optgroup>
+          <optgroup label="Yoco">
+            <option value="yoco-standard">Yoco — Standard</option>
+          </optgroup>
+          <optgroup label="Interswitch">
+            <option value="interswitch-standard">Interswitch — Standard</option>
+          </optgroup>
         </select>
+        <p class="scenario-desc" id="scenario-desc">
+          Default Paystack popup checkout flow.
+        </p>
 
         <label for="email">Email</label>
         <input
@@ -150,7 +187,9 @@
           required
         />
 
-        <label for="amount">Amount (<span id="currency-label">NGN</span>)</label>
+        <label for="amount"
+          >Amount (<span id="currency-label">NGN</span>)</label
+        >
         <input
           type="number"
           id="amount"
@@ -160,7 +199,7 @@
           required
         />
 
-        <button type="submit" id="pay-btn">Pay Now</button>
+        <button type="submit" id="pay-btn">Pay with Paystack</button>
       </form>
 
       <div id="result"></div>
@@ -176,46 +215,141 @@
       import { yocoProvider } from "@sanwohq/yoco";
       import { interswitchProvider } from "@sanwohq/interswitch";
 
-      // Provider configuration map
-      const providers = {
-        paystack: {
+      const scenarios = {
+        // --- Paystack ---
+        "paystack-checkout": {
           provider: paystackProvider,
           publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
           currency: "NGN",
+          label: "Paystack",
+          description: "Default Paystack popup checkout flow.",
+          sanwoProviderOptions: { method: "checkout" },
         },
-        flutterwave: {
+        "paystack-new-transaction": {
+          provider: paystackProvider,
+          publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
+          currency: "NGN",
+          label: "Paystack",
+          description:
+            "Uses newTransaction method — same UI, tracked differently on the Paystack dashboard.",
+          sanwoProviderOptions: { method: "newTransaction" },
+        },
+        "paystack-card-only": {
+          provider: paystackProvider,
+          publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
+          currency: "NGN",
+          label: "Paystack",
+          description: "Only card payments allowed via the channels option.",
+          sanwoProviderOptions: { method: "checkout", channels: ["card"] },
+        },
+        "paystack-bank-transfer": {
+          provider: paystackProvider,
+          publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
+          currency: "NGN",
+          label: "Paystack",
+          description:
+            "Only bank transfer allowed — customer pays via account transfer.",
+          sanwoProviderOptions: {
+            method: "checkout",
+            channels: ["bank_transfer"],
+          },
+        },
+
+        // --- Flutterwave ---
+        "flutterwave-standard": {
           provider: flutterwaveProvider,
           publicKey: import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY,
           currency: "NGN",
+          label: "Flutterwave",
+          description: "Standard Flutterwave checkout with all payment options.",
+          sanwoProviderOptions: {},
         },
-        paypal: {
+        "flutterwave-card-only": {
+          provider: flutterwaveProvider,
+          publicKey: import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY,
+          currency: "NGN",
+          label: "Flutterwave",
+          description: "Card-only payments via the payment_options param.",
+          sanwoProviderOptions: { paymentOptions: "card" },
+        },
+
+        // --- PayPal ---
+        "paypal-standard": {
           provider: paypalProvider,
           publicKey: import.meta.env.VITE_PAYPAL_CLIENT_ID,
           currency: "USD",
+          label: "PayPal",
+          description:
+            "Standard PayPal Buttons checkout — opens PayPal login popup.",
+          sanwoProviderOptions: {},
         },
-        razorpay: {
+
+        // --- Razorpay ---
+        "razorpay-standard": {
           provider: razorpayProvider,
           publicKey: import.meta.env.VITE_RAZORPAY_KEY_ID,
           currency: "INR",
+          label: "Razorpay",
+          description: "Standard Razorpay checkout modal with all methods.",
+          sanwoProviderOptions: {},
         },
-        monnify: {
+
+        // --- Monnify ---
+        "monnify-standard": {
           provider: monnifyProvider,
           publicKey: import.meta.env.VITE_MONNIFY_API_KEY,
           currency: "NGN",
+          label: "Monnify",
+          description:
+            "Standard Monnify checkout with card and bank transfer.",
           sanwoProviderOptions: {
             contractCode: import.meta.env.VITE_MONNIFY_CONTRACT_CODE,
             isTestMode: true,
           },
         },
-        yoco: {
+        "monnify-card-only": {
+          provider: monnifyProvider,
+          publicKey: import.meta.env.VITE_MONNIFY_API_KEY,
+          currency: "NGN",
+          label: "Monnify",
+          description: "Only card payments via the paymentMethods option.",
+          sanwoProviderOptions: {
+            contractCode: import.meta.env.VITE_MONNIFY_CONTRACT_CODE,
+            isTestMode: true,
+            paymentMethods: ["CARD"],
+          },
+        },
+        "monnify-transfer-only": {
+          provider: monnifyProvider,
+          publicKey: import.meta.env.VITE_MONNIFY_API_KEY,
+          currency: "NGN",
+          label: "Monnify",
+          description:
+            "Bank transfer only — customer pays via account transfer.",
+          sanwoProviderOptions: {
+            contractCode: import.meta.env.VITE_MONNIFY_CONTRACT_CODE,
+            isTestMode: true,
+            paymentMethods: ["ACCOUNT_TRANSFER"],
+          },
+        },
+
+        // --- Yoco ---
+        "yoco-standard": {
           provider: yocoProvider,
           publicKey: import.meta.env.VITE_YOCO_PUBLIC_KEY,
           currency: "ZAR",
+          label: "Yoco",
+          description: "Standard Yoco card checkout for South Africa.",
+          sanwoProviderOptions: {},
         },
-        interswitch: {
+
+        // --- Interswitch ---
+        "interswitch-standard": {
           provider: interswitchProvider,
           publicKey: import.meta.env.VITE_INTERSWITCH_MERCHANT_CODE,
           currency: "NGN",
+          label: "Interswitch",
+          description: "Standard Interswitch Webpay checkout.",
           sanwoProviderOptions: {
             payItemId: import.meta.env.VITE_INTERSWITCH_PAY_ITEM_ID,
           },
@@ -223,16 +357,21 @@
       };
 
       const form = document.getElementById("payment-form");
-      const providerSelect = document.getElementById("provider");
+      const scenarioSelect = document.getElementById("scenario");
+      const scenarioDesc = document.getElementById("scenario-desc");
       const currencyLabel = document.getElementById("currency-label");
       const payBtn = document.getElementById("pay-btn");
       const resultDiv = document.getElementById("result");
 
-      // Update currency label when provider changes
-      providerSelect.addEventListener("change", () => {
-        const config = providers[providerSelect.value];
+      function updateUI() {
+        const config = scenarios[scenarioSelect.value];
         currencyLabel.textContent = config.currency;
-      });
+        scenarioDesc.textContent = config.description;
+        payBtn.textContent = "Pay with " + config.label;
+      }
+
+      scenarioSelect.addEventListener("change", updateUI);
+      updateUI();
 
       function showResult(type, message) {
         resultDiv.className = type;
@@ -245,19 +384,17 @@
 
         const email = document.getElementById("email").value;
         const amountInput = parseFloat(document.getElementById("amount").value);
-        const selectedProvider = providerSelect.value;
+        const selected = scenarioSelect.value;
 
         if (!email || !amountInput) return;
 
-        const config = providers[selectedProvider];
+        const config = scenarios[selected];
 
-        // Create a new Sanwo instance for the selected provider
         const sanwo = createSanwo({
           provider: config.provider,
           publicKey: config.publicKey,
         });
 
-        // Always convert to minor units — Sanwo's API expects minor units
         const amount = Math.round(amountInput * 100);
 
         payBtn.disabled = true;
@@ -265,40 +402,34 @@
         resultDiv.style.display = "none";
 
         try {
-          const paymentOptions = {
+          const result = await sanwo({
             amount,
             currency: config.currency,
             customer: { email },
             description: "Sanwo example payment",
-          };
-
-          // Add provider-specific options if present
-          if (config.sanwoProviderOptions) {
-            paymentOptions.sanwoProviderOptions = config.sanwoProviderOptions;
-          }
-
-          const result = await sanwo(paymentOptions);
+            sanwoProviderOptions: config.sanwoProviderOptions,
+          });
 
           if (result.status === "successful") {
             showResult(
               "success",
-              `Payment successful! Reference: ${result.reference}`
+              "Payment successful! Reference: " + result.reference
             );
           } else if (result.status === "cancelled") {
             showResult("cancelled", "Payment was cancelled.");
           } else if (result.status === "pending") {
             showResult(
               "pending",
-              `Payment is pending. Reference: ${result.reference}`
+              "Payment is pending. Reference: " + result.reference
             );
           } else {
-            showResult("error", `Payment failed. Status: ${result.status}`);
+            showResult("error", "Payment failed. Status: " + result.status);
           }
         } catch (error) {
-          showResult("error", `Payment failed: ${error.message}`);
+          showResult("error", "Payment failed: " + error.message);
         } finally {
           payBtn.disabled = false;
-          payBtn.textContent = "Pay Now";
+          updateUI();
         }
       });
     </script>

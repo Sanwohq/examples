@@ -1,45 +1,36 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useSanwoCheckout } from "@sanwohq/react";
 import type { CheckoutResult } from "@sanwohq/types";
-import type { ProviderConfig } from "./App";
+import type { ScenarioConfig } from "./App";
 
 interface CheckoutFormProps {
-  providers: ProviderConfig[];
+  scenarios: ScenarioConfig[];
   selectedId: string;
-  onProviderChange: (id: string) => void;
-  currency: string;
-  providerId: string;
-}
-
-function buildProviderOptions(providerId: string): Record<string, unknown> {
-  switch (providerId) {
-    case "paystack":
-      return { channels: ["card", "bank", "ussd", "bank_transfer"] };
-    case "monnify":
-      return {
-        contractCode: import.meta.env.VITE_MONNIFY_CONTRACT_CODE ?? "",
-        isTestMode: true,
-      };
-    case "interswitch":
-      return {
-        payItemId: import.meta.env.VITE_INTERSWITCH_PAY_ITEM_ID ?? "",
-      };
-    default:
-      return {};
-  }
+  onScenarioChange: (id: string) => void;
+  selected: ScenarioConfig;
 }
 
 export function CheckoutForm({
-  providers,
+  scenarios,
   selectedId,
-  onProviderChange,
-  currency,
-  providerId,
+  onScenarioChange,
+  selected,
 }: CheckoutFormProps) {
   const { checkout, isLoading, error, result, reset } = useSanwoCheckout();
 
   const [email, setEmail] = useState("");
   const [amount, setAmount] = useState("");
+
+  // Group scenarios by provider for <optgroup> rendering
+  const groups = useMemo(() => {
+    const map = new Map<string, ScenarioConfig[]>();
+    for (const s of scenarios) {
+      const list = map.get(s.group) ?? [];
+      list.push(s);
+      map.set(s.group, list);
+    }
+    return Array.from(map.entries());
+  }, [scenarios]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,10 +41,10 @@ export function CheckoutForm({
     try {
       await checkout({
         amount: checkoutAmount,
-        currency,
+        currency: selected.currency,
         customer: { email },
         description: "Sanwo example payment",
-        sanwoProviderOptions: buildProviderOptions(providerId),
+        sanwoProviderOptions: selected.sanwoProviderOptions,
       });
     } catch {
       // Error is captured in the hook's `error` state
@@ -78,32 +69,35 @@ export function CheckoutForm({
     );
   }
 
-  const selected = providers.find((p) => p.id === selectedId);
-
   return (
     <div style={styles.card}>
       <h1 style={styles.title}>Sanwo Checkout</h1>
       <p style={styles.subtitle}>
-        React example &mdash; {selected?.label ?? selectedId}
+        React example &mdash; {selected.group}
       </p>
 
       <form onSubmit={handleSubmit} style={styles.form}>
         <div style={styles.field}>
-          <label htmlFor="provider" style={styles.label}>
-            Payment Provider
+          <label htmlFor="scenario" style={styles.label}>
+            Payment Scenario
           </label>
           <select
-            id="provider"
+            id="scenario"
             value={selectedId}
-            onChange={(e) => onProviderChange(e.target.value)}
+            onChange={(e) => onScenarioChange(e.target.value)}
             style={styles.select}
           >
-            {providers.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.label}
-              </option>
+            {groups.map(([group, items]) => (
+              <optgroup key={group} label={group}>
+                {items.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.label}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
+          <span style={styles.hint}>{selected.description}</span>
         </div>
 
         <div style={styles.field}>
@@ -123,7 +117,7 @@ export function CheckoutForm({
 
         <div style={styles.field}>
           <label htmlFor="amount" style={styles.label}>
-            Amount ({currency})
+            Amount ({selected.currency})
           </label>
           <input
             id="amount"
@@ -147,7 +141,7 @@ export function CheckoutForm({
             cursor: isLoading ? "not-allowed" : "pointer",
           }}
         >
-          {isLoading ? "Processing..." : `Pay with ${selected?.label ?? selectedId}`}
+          {isLoading ? "Processing..." : `Pay with ${selected.group}`}
         </button>
       </form>
 
@@ -227,6 +221,11 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 13,
     fontWeight: 600,
     color: "#333",
+  },
+  hint: {
+    fontSize: 12,
+    color: "#888",
+    marginTop: 2,
   },
   input: {
     padding: "10px 12px",
