@@ -136,6 +136,7 @@ async function handlePayment() {
       customer: {
         email: email.value,
       },
+      description: "Sanwo example payment",
       ...(providerOptions ? { sanwoProviderOptions: providerOptions } : {}),
     });
 

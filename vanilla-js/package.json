@@ -11,8 +11,8 @@
   "dependencies": {
     "@sanwohq/flutterwave": "latest",
     "@sanwohq/interswitch": "latest",
-    "@sanwohq/monnify": "latest",
-    "@sanwohq/paypal": "latest",
+    "@sanwohq/monnify": "^0.1.0",
+    "@sanwohq/paypal": "^0.1.0",
     "@sanwohq/paystack": "latest",
     "@sanwohq/razorpay": "latest",
     "@sanwohq/stripe": "latest",

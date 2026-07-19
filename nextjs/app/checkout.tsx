@@ -91,6 +91,7 @@ export default function Checkout() {
         amount: Math.round(parseFloat(amount) * 100),
         currency: selected.currency,
         customer: { email },
+        description: "Sanwo example payment",
         ...("providerOptions" in selected && {
           sanwoProviderOptions: selected.providerOptions,
         }),

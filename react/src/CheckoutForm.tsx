@@ -52,6 +52,7 @@ export function CheckoutForm({
         amount: checkoutAmount,
         currency,
         customer: { email },
+        description: "Sanwo example payment",
         sanwoProviderOptions: buildProviderOptions(providerId),
       });
     } catch {
