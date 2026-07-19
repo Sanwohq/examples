@@ -1,8 +1,40 @@
 import { useState } from "react";
 import { useSanwoCheckout } from "@sanwohq/react";
 import type { CheckoutResult } from "@sanwohq/types";
+import type { ProviderConfig } from "./App";
 
-export function CheckoutForm() {
+interface CheckoutFormProps {
+  providers: ProviderConfig[];
+  selectedId: string;
+  onProviderChange: (id: string) => void;
+  currency: string;
+  providerId: string;
+}
+
+function buildProviderOptions(providerId: string): Record<string, unknown> {
+  switch (providerId) {
+    case "paystack":
+      return { channels: ["card", "bank", "ussd", "bank_transfer"] };
+    case "monnify":
+      return {
+        contractCode: import.meta.env.VITE_MONNIFY_CONTRACT_CODE ?? "",
+      };
+    case "interswitch":
+      return {
+        payItemId: import.meta.env.VITE_INTERSWITCH_PAY_ITEM_ID ?? "",
+      };
+    default:
+      return {};
+  }
+}
+
+export function CheckoutForm({
+  providers,
+  selectedId,
+  onProviderChange,
+  currency,
+  providerId,
+}: CheckoutFormProps) {
   const { checkout, isLoading, error, result, reset } = useSanwoCheckout();
 
   const [email, setEmail] = useState("");
@@ -11,16 +43,15 @@ export function CheckoutForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const amountInKobo = Math.round(parseFloat(amount) * 100);
+    const numericAmount = parseFloat(amount);
+    const checkoutAmount = Math.round(numericAmount * 100);
 
     try {
       await checkout({
-        amount: amountInKobo,
-        currency: "NGN",
+        amount: checkoutAmount,
+        currency,
         customer: { email },
-        sanwoProviderOptions: {
-          channels: ["card", "bank", "ussd", "bank_transfer"],
-        },
+        sanwoProviderOptions: buildProviderOptions(providerId),
       });
     } catch {
       // Error is captured in the hook's `error` state
@@ -45,12 +76,34 @@ export function CheckoutForm() {
     );
   }
 
+  const selected = providers.find((p) => p.id === selectedId);
+
   return (
     <div style={styles.card}>
-      <h1 style={styles.title}>Sanwo + Paystack</h1>
-      <p style={styles.subtitle}>React checkout example</p>
+      <h1 style={styles.title}>Sanwo Checkout</h1>
+      <p style={styles.subtitle}>
+        React example &mdash; {selected?.label ?? selectedId}
+      </p>
 
       <form onSubmit={handleSubmit} style={styles.form}>
+        <div style={styles.field}>
+          <label htmlFor="provider" style={styles.label}>
+            Payment Provider
+          </label>
+          <select
+            id="provider"
+            value={selectedId}
+            onChange={(e) => onProviderChange(e.target.value)}
+            style={styles.select}
+          >
+            {providers.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div style={styles.field}>
           <label htmlFor="email" style={styles.label}>
             Email
@@ -68,7 +121,7 @@ export function CheckoutForm() {
 
         <div style={styles.field}>
           <label htmlFor="amount" style={styles.label}>
-            Amount (NGN)
+            Amount ({currency})
           </label>
           <input
             id="amount"
@@ -92,7 +145,7 @@ export function CheckoutForm() {
             cursor: isLoading ? "not-allowed" : "pointer",
           }}
         >
-          {isLoading ? "Processing..." : "Pay Now"}
+          {isLoading ? "Processing..." : `Pay with ${selected?.label ?? selectedId}`}
         </button>
       </form>
 
@@ -179,6 +232,15 @@ const styles: Record<string, React.CSSProperties> = {
     border: "1px solid #ddd",
     fontSize: 15,
     outline: "none",
+  },
+  select: {
+    padding: "10px 12px",
+    borderRadius: 8,
+    border: "1px solid #ddd",
+    fontSize: 15,
+    outline: "none",
+    background: "#fff",
+    cursor: "pointer",
   },
   button: {
     marginTop: 8,

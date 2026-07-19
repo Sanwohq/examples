@@ -23,7 +23,7 @@ export default function Home() {
       >
         <h1 style={{ fontSize: 24, marginTop: 0 }}>Sanwo Checkout</h1>
         <p style={{ color: "#666", marginBottom: 24 }}>
-          Pay with Paystack via the Sanwo SDK
+          Choose a payment provider and pay via the Sanwo SDK
         </p>
         <Checkout />
       </div>

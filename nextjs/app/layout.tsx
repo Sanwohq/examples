@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Sanwo + Next.js Example",
-  description: "Accept payments with Sanwo and Paystack in a Next.js app",
+  description: "Accept payments with Sanwo in a Next.js app — supports all 8 providers",
 };
 
 export default function RootLayout({

@@ -52,6 +52,7 @@
         color: #444;
       }
 
+      select,
       input {
         width: 100%;
         padding: 10px 12px;
@@ -60,8 +61,10 @@
         font-size: 1rem;
         margin-bottom: 16px;
         transition: border-color 0.2s;
+        background: #fff;
       }
 
+      select:focus,
       input:focus {
         outline: none;
         border-color: #4f46e5;
@@ -114,14 +117,32 @@
         color: #991b1b;
         border: 1px solid #fecaca;
       }
+
+      #result.pending {
+        background: #eff6ff;
+        color: #1e40af;
+        border: 1px solid #bfdbfe;
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <h1>Sanwo Payment</h1>
-      <p class="subtitle">Vanilla JS example with Paystack provider</p>
+      <p class="subtitle">Vanilla JS example with all payment providers</p>
 
       <form id="payment-form">
+        <label for="provider">Payment Provider</label>
+        <select id="provider" required>
+          <option value="paystack">Paystack</option>
+          <option value="flutterwave">Flutterwave</option>
+          <option value="stripe">Stripe</option>
+          <option value="paypal">PayPal</option>
+          <option value="razorpay">Razorpay</option>
+          <option value="monnify">Monnify</option>
+          <option value="yoco">Yoco</option>
+          <option value="interswitch">Interswitch</option>
+        </select>
+
         <label for="email">Email</label>
         <input
           type="email"
@@ -130,7 +151,7 @@
           required
         />
 
-        <label for="amount">Amount (NGN)</label>
+        <label for="amount">Amount (<span id="currency-label">NGN</span>)</label>
         <input
           type="number"
           id="amount"
@@ -149,16 +170,83 @@
     <script type="module">
       import { createSanwo } from "@sanwohq/web";
       import { paystackProvider } from "@sanwohq/paystack";
+      import { flutterwaveProvider } from "@sanwohq/flutterwave";
+      import { stripeProvider } from "@sanwohq/stripe";
+      import { paypalProvider } from "@sanwohq/paypal";
+      import { razorpayProvider } from "@sanwohq/razorpay";
+      import { monnifyProvider } from "@sanwohq/monnify";
+      import { yocoProvider } from "@sanwohq/yoco";
+      import { interswitchProvider } from "@sanwohq/interswitch";
 
-      // Replace with your Paystack public key
-      const sanwo = createSanwo({
-        provider: paystackProvider,
-        publicKey: "pk_test_xxxxxxxxxxxxxxxxxxxxx",
-      });
+      // Provider configuration map
+      const providers = {
+        paystack: {
+          provider: paystackProvider,
+          publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY,
+          currency: "NGN",
+          usesMinorUnits: true,
+        },
+        flutterwave: {
+          provider: flutterwaveProvider,
+          publicKey: import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY,
+          currency: "NGN",
+          usesMinorUnits: false,
+        },
+        stripe: {
+          provider: stripeProvider,
+          publicKey: import.meta.env.VITE_STRIPE_PUBLIC_KEY,
+          currency: "USD",
+          usesMinorUnits: true,
+        },
+        paypal: {
+          provider: paypalProvider,
+          publicKey: import.meta.env.VITE_PAYPAL_CLIENT_ID,
+          currency: "USD",
+          usesMinorUnits: false,
+        },
+        razorpay: {
+          provider: razorpayProvider,
+          publicKey: import.meta.env.VITE_RAZORPAY_KEY_ID,
+          currency: "INR",
+          usesMinorUnits: true,
+        },
+        monnify: {
+          provider: monnifyProvider,
+          publicKey: import.meta.env.VITE_MONNIFY_API_KEY,
+          currency: "NGN",
+          usesMinorUnits: false,
+          sanwoProviderOptions: {
+            contractCode: import.meta.env.VITE_MONNIFY_CONTRACT_CODE,
+          },
+        },
+        yoco: {
+          provider: yocoProvider,
+          publicKey: import.meta.env.VITE_YOCO_PUBLIC_KEY,
+          currency: "ZAR",
+          usesMinorUnits: true,
+        },
+        interswitch: {
+          provider: interswitchProvider,
+          publicKey: import.meta.env.VITE_INTERSWITCH_MERCHANT_CODE,
+          currency: "NGN",
+          usesMinorUnits: true,
+          sanwoProviderOptions: {
+            payItemId: import.meta.env.VITE_INTERSWITCH_PAY_ITEM_ID,
+          },
+        },
+      };
 
       const form = document.getElementById("payment-form");
+      const providerSelect = document.getElementById("provider");
+      const currencyLabel = document.getElementById("currency-label");
       const payBtn = document.getElementById("pay-btn");
       const resultDiv = document.getElementById("result");
+
+      // Update currency label when provider changes
+      providerSelect.addEventListener("change", () => {
+        const config = providers[providerSelect.value];
+        currencyLabel.textContent = config.currency;
+      });
 
       function showResult(type, message) {
         resultDiv.className = type;
@@ -170,23 +258,41 @@
         e.preventDefault();
 
         const email = document.getElementById("email").value;
-        const amountNGN = parseFloat(document.getElementById("amount").value);
+        const amountInput = parseFloat(document.getElementById("amount").value);
+        const selectedProvider = providerSelect.value;
 
-        if (!email || !amountNGN) return;
+        if (!email || !amountInput) return;
 
-        // Convert to kobo (minor units) for Paystack
-        const amountInKobo = Math.round(amountNGN * 100);
+        const config = providers[selectedProvider];
+
+        // Create a new Sanwo instance for the selected provider
+        const sanwo = createSanwo({
+          provider: config.provider,
+          publicKey: config.publicKey,
+        });
+
+        // Convert to minor units if the provider requires it
+        const amount = config.usesMinorUnits
+          ? Math.round(amountInput * 100)
+          : amountInput;
 
         payBtn.disabled = true;
         payBtn.textContent = "Processing...";
         resultDiv.style.display = "none";
 
         try {
-          const result = await sanwo({
-            amount: amountInKobo,
-            currency: "NGN",
+          const paymentOptions = {
+            amount,
+            currency: config.currency,
             customer: { email },
-          });
+          };
+
+          // Add provider-specific options if present
+          if (config.sanwoProviderOptions) {
+            paymentOptions.sanwoProviderOptions = config.sanwoProviderOptions;
+          }
+
+          const result = await sanwo(paymentOptions);
 
           if (result.status === "successful") {
             showResult(
@@ -195,6 +301,13 @@
             );
           } else if (result.status === "cancelled") {
             showResult("cancelled", "Payment was cancelled.");
+          } else if (result.status === "pending") {
+            showResult(
+              "pending",
+              `Payment is pending. Reference: ${result.reference}`
+            );
+          } else {
+            showResult("error", `Payment failed. Status: ${result.status}`);
           }
         } catch (error) {
           showResult("error", `Payment failed: ${error.message}`);

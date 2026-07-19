@@ -2,7 +2,7 @@
   "name": "sanwo-vue-example",
   "private": true,
   "version": "1.0.0",
-  "description": "Vue 3 example app using Sanwo payment SDK with Paystack",
+  "description": "Vue 3 example app using Sanwo payment SDK with all providers",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,9 +10,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@sanwohq/flutterwave": "latest",
+    "@sanwohq/interswitch": "latest",
+    "@sanwohq/monnify": "latest",
+    "@sanwohq/paypal": "latest",
     "@sanwohq/paystack": "latest",
+    "@sanwohq/razorpay": "latest",
+    "@sanwohq/stripe": "latest",
     "@sanwohq/types": "latest",
     "@sanwohq/web": "latest",
+    "@sanwohq/yoco": "latest",
     "vue": "^3.5.0"
   },
   "devDependencies": {

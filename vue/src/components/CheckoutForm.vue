@@ -1,9 +1,85 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed, watch } from "vue";
 import { createSanwo } from "@sanwohq/web";
 import { paystackProvider } from "@sanwohq/paystack";
+import { flutterwaveProvider } from "@sanwohq/flutterwave";
+import { stripeProvider } from "@sanwohq/stripe";
+import { paypalProvider } from "@sanwohq/paypal";
+import { razorpayProvider } from "@sanwohq/razorpay";
+import { monnifyProvider } from "@sanwohq/monnify";
+import { yocoProvider } from "@sanwohq/yoco";
+import { interswitchProvider } from "@sanwohq/interswitch";
 import type { CheckoutResult } from "@sanwohq/types";
 
+type ProviderKey =
+  | "paystack"
+  | "flutterwave"
+  | "stripe"
+  | "paypal"
+  | "razorpay"
+  | "monnify"
+  | "yoco"
+  | "interswitch";
+
+interface ProviderConfig {
+  label: string;
+  provider: typeof paystackProvider;
+  envKey: string;
+  currency: string;
+}
+
+const providers: Record<ProviderKey, ProviderConfig> = {
+  paystack: {
+    label: "Paystack",
+    provider: paystackProvider,
+    envKey: "VITE_PAYSTACK_PUBLIC_KEY",
+    currency: "NGN",
+  },
+  flutterwave: {
+    label: "Flutterwave",
+    provider: flutterwaveProvider,
+    envKey: "VITE_FLUTTERWAVE_PUBLIC_KEY",
+    currency: "NGN",
+  },
+  stripe: {
+    label: "Stripe",
+    provider: stripeProvider,
+    envKey: "VITE_STRIPE_PUBLIC_KEY",
+    currency: "USD",
+  },
+  paypal: {
+    label: "PayPal",
+    provider: paypalProvider,
+    envKey: "VITE_PAYPAL_CLIENT_ID",
+    currency: "USD",
+  },
+  razorpay: {
+    label: "Razorpay",
+    provider: razorpayProvider,
+    envKey: "VITE_RAZORPAY_KEY_ID",
+    currency: "INR",
+  },
+  monnify: {
+    label: "Monnify",
+    provider: monnifyProvider,
+    envKey: "VITE_MONNIFY_API_KEY",
+    currency: "NGN",
+  },
+  yoco: {
+    label: "Yoco",
+    provider: yocoProvider,
+    envKey: "VITE_YOCO_PUBLIC_KEY",
+    currency: "ZAR",
+  },
+  interswitch: {
+    label: "Interswitch",
+    provider: interswitchProvider,
+    envKey: "VITE_INTERSWITCH_MERCHANT_CODE",
+    currency: "NGN",
+  },
+};
+
+const selectedProvider = ref<ProviderKey>("paystack");
 const email = ref("");
 const amount = ref<number | undefined>();
 const loading = ref(false);
@@ -12,28 +88,62 @@ const result = ref<{
   message: string;
 } | null>(null);
 
-// Initialize Sanwo with the Paystack provider and your public key
-const sanwo = createSanwo({
-  provider: paystackProvider,
-  publicKey: "pk_test_xxxxxxxxxxxxxxxxxxxxx", // Replace with your Paystack public key
+const currentCurrency = computed(() => providers[selectedProvider.value].currency);
+
+function getPublicKey(providerKey: ProviderKey): string {
+  const envKey = providers[providerKey].envKey;
+  return (import.meta.env[envKey] as string) || "";
+}
+
+function buildSanwoInstance(providerKey: ProviderKey) {
+  const config = providers[providerKey];
+  return createSanwo({
+    provider: config.provider,
+    publicKey: getPublicKey(providerKey),
+  });
+}
+
+const sanwo = ref(buildSanwoInstance(selectedProvider.value));
+
+watch(selectedProvider, (newProvider) => {
+  sanwo.value = buildSanwoInstance(newProvider);
+  result.value = null;
 });
+
+function getSanwoProviderOptions(providerKey: ProviderKey): Record<string, string> | undefined {
+  if (providerKey === "monnify") {
+    const contractCode = import.meta.env.VITE_MONNIFY_CONTRACT_CODE as string;
+    if (contractCode) {
+      return { contractCode };
+    }
+  }
+  if (providerKey === "interswitch") {
+    const payItemId = import.meta.env.VITE_INTERSWITCH_PAY_ITEM_ID as string;
+    if (payItemId) {
+      return { payItemId };
+    }
+  }
+  return undefined;
+}
 
 async function handlePayment() {
   if (!email.value || !amount.value) return;
 
-  // Convert to kobo (minor units) for Paystack
-  const amountInKobo = Math.round(amount.value * 100);
+  const amountInMinorUnits = Math.round(amount.value * 100);
 
   loading.value = true;
   result.value = null;
 
   try {
-    const response: CheckoutResult = await sanwo({
-      amount: amountInKobo,
-      currency: "NGN",
+    const providerOptions = getSanwoProviderOptions(selectedProvider.value);
+
+    const response: CheckoutResult = await sanwo.value({
+      amount: amountInMinorUnits,
+      currency: currentCurrency.value,
       customer: {
         email: email.value,
       },
+      ...(providerOptions ? { sanwoProviderOptions: providerOptions } : {}),
     });
 
     if (response.status === "successful") {
@@ -66,9 +176,20 @@ async function handlePayment() {
 <template>
   <div class="container">
     <h1>Sanwo Payment</h1>
-    <p class="subtitle">Vue 3 example with Paystack provider</p>
+    <p class="subtitle">Vue 3 example with multiple providers</p>
 
     <form @submit.prevent="handlePayment">
+      <label for="provider">Payment Provider</label>
+      <select id="provider" v-model="selectedProvider">
+        <option
+          v-for="(config, key) in providers"
+          :key="key"
+          :value="key"
+        >
+          {{ config.label }}
+        </option>
+      </select>
+
       <label for="email">Email</label>
       <input
         id="email"
@@ -78,7 +199,7 @@ async function handlePayment() {
         required
       />
 
-      <label for="amount">Amount (NGN)</label>
+      <label for="amount">Amount ({{ currentCurrency }})</label>
       <input
         id="amount"
         v-model.number="amount"
@@ -90,7 +211,7 @@ async function handlePayment() {
       />
 
       <button type="submit" :disabled="loading">
-        {{ loading ? "Processing..." : "Pay Now" }}
+        {{ loading ? "Processing..." : `Pay with ${providers[selectedProvider].label}` }}
       </button>
     </form>
 
@@ -129,6 +250,7 @@ label {
   color: #444;
 }
 
+select,
 input {
   width: 100%;
   padding: 10px 12px;
@@ -137,11 +259,21 @@ input {
   font-size: 1rem;
   margin-bottom: 16px;
   transition: border-color 0.2s;
+  background: #fff;
 }
 
+select:focus,
 input:focus {
   outline: none;
   border-color: #4f46e5;
+}
+
+select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
 }
 
 button {

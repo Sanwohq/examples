@@ -1,15 +1,91 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { createSanwo } from "@sanwohq/web";
 import { paystackProvider } from "@sanwohq/paystack";
+import { flutterwaveProvider } from "@sanwohq/flutterwave";
+import { stripeProvider } from "@sanwohq/stripe";
+import { paypalProvider } from "@sanwohq/paypal";
+import { razorpayProvider } from "@sanwohq/razorpay";
+import { monnifyProvider } from "@sanwohq/monnify";
+import { yocoProvider } from "@sanwohq/yoco";
+import { interswitchProvider } from "@sanwohq/interswitch";
 import type { CheckoutResult } from "@sanwohq/types";
 
+const PROVIDERS = [
+  {
+    label: "Paystack",
+    provider: paystackProvider,
+    publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY ?? "",
+    currency: "NGN",
+  },
+  {
+    label: "Flutterwave",
+    provider: flutterwaveProvider,
+    publicKey: process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY ?? "",
+    currency: "NGN",
+  },
+  {
+    label: "Stripe",
+    provider: stripeProvider,
+    publicKey: process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY ?? "",
+    currency: "USD",
+  },
+  {
+    label: "PayPal",
+    provider: paypalProvider,
+    publicKey: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ?? "",
+    currency: "USD",
+  },
+  {
+    label: "Razorpay",
+    provider: razorpayProvider,
+    publicKey: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ?? "",
+    currency: "INR",
+  },
+  {
+    label: "Monnify",
+    provider: monnifyProvider,
+    publicKey: process.env.NEXT_PUBLIC_MONNIFY_API_KEY ?? "",
+    currency: "NGN",
+    providerOptions: {
+      contractCode: process.env.NEXT_PUBLIC_MONNIFY_CONTRACT_CODE ?? "",
+    },
+  },
+  {
+    label: "Yoco",
+    provider: yocoProvider,
+    publicKey: process.env.NEXT_PUBLIC_YOCO_PUBLIC_KEY ?? "",
+    currency: "ZAR",
+  },
+  {
+    label: "Interswitch",
+    provider: interswitchProvider,
+    publicKey: process.env.NEXT_PUBLIC_INTERSWITCH_MERCHANT_CODE ?? "",
+    currency: "NGN",
+    providerOptions: {
+      payItemId: process.env.NEXT_PUBLIC_INTERSWITCH_PAY_ITEM_ID ?? "",
+    },
+  },
+] as const;
+
 export default function Checkout() {
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const [email, setEmail] = useState("");
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<CheckoutResult | null>(null);
+
+  const selected = PROVIDERS[selectedIndex];
+
+  const sanwo = useMemo(
+    () =>
+      createSanwo({
+        provider: selected.provider,
+        publicKey: selected.publicKey,
+      }),
+    [selectedIndex],
+  );
 
   async function handlePay(e: React.FormEvent) {
     e.preventDefault();
@@ -17,15 +93,13 @@ export default function Checkout() {
     setResult(null);
 
     try {
-      const sanwo = createSanwo({
-        provider: paystackProvider,
-        publicKey: "pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-      });
-
       const checkoutResult = await sanwo({
-        amount: Math.round(parseFloat(amount) * 100), // convert to kobo
-        currency: "NGN",
+        amount: Math.round(parseFloat(amount) * 100),
+        currency: selected.currency,
         customer: { email },
+        ...("providerOptions" in selected && {
+          sanwoProviderOptions: selected.providerOptions,
+        }),
       });
 
       setResult(checkoutResult);
@@ -33,7 +107,7 @@ export default function Checkout() {
       console.error("Payment error:", err);
       setResult({
         status: "failed",
-        provider: "paystack",
+        provider: selected.label.toLowerCase(),
         error: {
           code: "CHECKOUT_FAILED",
           message: err instanceof Error ? err.message : "Payment failed",
@@ -47,6 +121,34 @@ export default function Checkout() {
 
   return (
     <>
+      <label style={{ display: "block", marginBottom: 16 }}>
+        <span style={{ display: "block", marginBottom: 4, fontWeight: 500 }}>
+          Payment Provider
+        </span>
+        <select
+          value={selectedIndex}
+          onChange={(e) => {
+            setSelectedIndex(Number(e.target.value));
+            setResult(null);
+          }}
+          style={{
+            width: "100%",
+            padding: "8px 12px",
+            borderRadius: 6,
+            border: "1px solid #ddd",
+            fontSize: 14,
+            boxSizing: "border-box",
+            background: "#fff",
+          }}
+        >
+          {PROVIDERS.map((p, i) => (
+            <option key={p.label} value={i}>
+              {p.label}
+            </option>
+          ))}
+        </select>
+      </label>
+
       <form onSubmit={handlePay}>
         <label style={{ display: "block", marginBottom: 16 }}>
           <span style={{ display: "block", marginBottom: 4, fontWeight: 500 }}>
@@ -71,7 +173,7 @@ export default function Checkout() {
 
         <label style={{ display: "block", marginBottom: 24 }}>
           <span style={{ display: "block", marginBottom: 4, fontWeight: 500 }}>
-            Amount (NGN)
+            Amount ({selected.currency})
           </span>
           <input
             type="number"
@@ -107,7 +209,7 @@ export default function Checkout() {
             cursor: loading ? "not-allowed" : "pointer",
           }}
         >
-          {loading ? "Processing..." : "Pay Now"}
+          {loading ? "Processing..." : `Pay with ${selected.label}`}
         </button>
       </form>
 

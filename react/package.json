@@ -2,7 +2,7 @@
   "name": "sanwo-react-example",
   "private": true,
   "version": "1.0.0",
-  "description": "React example app using Sanwo payment SDK with Paystack",
+  "description": "React example app using Sanwo payment SDK with all providers",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,9 +10,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@sanwohq/flutterwave": "latest",
+    "@sanwohq/interswitch": "latest",
+    "@sanwohq/monnify": "latest",
+    "@sanwohq/paypal": "latest",
     "@sanwohq/paystack": "latest",
+    "@sanwohq/razorpay": "latest",
     "@sanwohq/react": "latest",
+    "@sanwohq/stripe": "latest",
     "@sanwohq/types": "latest",
+    "@sanwohq/yoco": "latest",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

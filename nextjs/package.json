@@ -2,16 +2,23 @@
   "name": "sanwo-nextjs-example",
   "private": true,
   "version": "1.0.0",
-  "description": "Next.js example app using Sanwo payment SDK with Paystack",
+  "description": "Next.js example app using Sanwo payment SDK with all providers",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start"
   },
   "dependencies": {
+    "@sanwohq/flutterwave": "latest",
+    "@sanwohq/interswitch": "latest",
+    "@sanwohq/monnify": "latest",
+    "@sanwohq/paypal": "latest",
     "@sanwohq/paystack": "latest",
+    "@sanwohq/razorpay": "latest",
+    "@sanwohq/stripe": "latest",
     "@sanwohq/types": "latest",
     "@sanwohq/web": "latest",
+    "@sanwohq/yoco": "latest",
     "next": "^14.2.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0"
