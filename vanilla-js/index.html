@@ -157,9 +157,6 @@
             <option value="flutterwave-standard">Flutterwave — Standard</option>
             <option value="flutterwave-card-only">Flutterwave — Card Only</option>
           </optgroup>
-          <optgroup label="PayPal">
-            <option value="paypal-standard">PayPal — Standard</option>
-          </optgroup>
           <optgroup label="Razorpay">
             <option value="razorpay-standard">Razorpay — Standard</option>
           </optgroup>
@@ -206,7 +203,7 @@
       import { createSanwo } from "@sanwohq/web";
       import { paystackProvider } from "@sanwohq/paystack";
       import { flutterwaveProvider } from "@sanwohq/flutterwave";
-      import { paypalProvider } from "@sanwohq/paypal";
+
       import { razorpayProvider } from "@sanwohq/razorpay";
       import { monnifyProvider } from "@sanwohq/monnify";
       import { interswitchProvider } from "@sanwohq/interswitch";
@@ -267,17 +264,6 @@
           label: "Flutterwave",
           description: "Card-only payments via the payment_options param.",
           sanwoProviderOptions: { paymentOptions: "card" },
-        },
-
-        // --- PayPal ---
-        "paypal-standard": {
-          provider: paypalProvider,
-          publicKey: import.meta.env.VITE_PAYPAL_CLIENT_ID,
-          currency: "USD",
-          label: "PayPal",
-          description:
-            "Standard PayPal Buttons checkout — opens PayPal login popup.",
-          sanwoProviderOptions: {},
         },
 
         // --- Razorpay ---

@@ -3,7 +3,7 @@ import { SanwoReactProvider } from "@sanwohq/react";
 import type { SanwoProviderDefinition } from "@sanwohq/types";
 import { paystackProvider } from "@sanwohq/paystack";
 import { flutterwaveProvider } from "@sanwohq/flutterwave";
-import { paypalProvider } from "@sanwohq/paypal";
+
 import { razorpayProvider } from "@sanwohq/razorpay";
 import { monnifyProvider } from "@sanwohq/monnify";
 import { interswitchProvider } from "@sanwohq/interswitch";
@@ -83,18 +83,6 @@ export const SCENARIOS: ScenarioConfig[] = [
     publicKey: import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY ?? "",
     currency: "NGN",
     sanwoProviderOptions: { paymentOptions: "card" },
-  },
-
-  // ── PayPal ────────────────────────────────────────────────
-  {
-    id: "paypal-standard",
-    label: "PayPal — Standard",
-    description: "Standard PayPal checkout",
-    group: "PayPal",
-    provider: paypalProvider,
-    publicKey: import.meta.env.VITE_PAYPAL_CLIENT_ID ?? "",
-    currency: "USD",
-    sanwoProviderOptions: {},
   },
 
   // ── Razorpay ──────────────────────────────────────────────

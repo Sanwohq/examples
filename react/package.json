@@ -13,7 +13,6 @@
     "@sanwohq/flutterwave": "latest",
     "@sanwohq/interswitch": "latest",
     "@sanwohq/monnify": "latest",
-    "@sanwohq/paypal": "latest",
     "@sanwohq/paystack": "latest",
     "@sanwohq/razorpay": "latest",
     "@sanwohq/react": "latest",

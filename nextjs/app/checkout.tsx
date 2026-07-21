@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { createSanwo } from "@sanwohq/web";
 import { paystackProvider } from "@sanwohq/paystack";
 import { flutterwaveProvider } from "@sanwohq/flutterwave";
-import { paypalProvider } from "@sanwohq/paypal";
+
 import { razorpayProvider } from "@sanwohq/razorpay";
 import { monnifyProvider } from "@sanwohq/monnify";
 import { interswitchProvider } from "@sanwohq/interswitch";
@@ -84,18 +84,6 @@ const SCENARIOS: Scenario[] = [
     publicKey: process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY ?? "",
     currency: "NGN",
     sanwoProviderOptions: { paymentOptions: "card" },
-  },
-
-  // ── PayPal ────────────────────────────────────────────────
-  {
-    id: "paypal-standard",
-    label: "PayPal — Standard",
-    group: "PayPal",
-    description: "Standard PayPal checkout",
-    provider: paypalProvider,
-    publicKey: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ?? "",
-    currency: "USD",
-    sanwoProviderOptions: {},
   },
 
   // ── Razorpay ──────────────────────────────────────────────
