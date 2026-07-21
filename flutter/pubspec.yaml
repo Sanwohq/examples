@@ -1,0 +1,17 @@
+name: sanwo_flutter_example
+description: A minimal example app showing how to use the sanwo_flutter SDK.
+publish_to: none
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.10.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  sanwo_flutter: ^0.1.0
+  sanwo_paystack: ^0.1.0
+  sanwo_flutterwave: ^0.1.0
+  sanwo_razorpay: ^0.1.0
+  sanwo_monnify: ^0.1.0
+  sanwo_interswitch: ^0.1.0

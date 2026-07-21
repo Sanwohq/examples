@@ -4,12 +4,16 @@ Working example apps using the [Sanwo payment SDK](https://github.com/Sanwohq/co
 
 ## Examples
 
-| Example | Framework | Packages Used |
-|---------|-----------|--------------|
-| [vanilla-js](./vanilla-js) | Vite + Vanilla JS | `@sanwohq/web`, `@sanwohq/paystack` |
-| [react](./react) | Vite + React + TypeScript | `@sanwohq/react`, `@sanwohq/paystack` |
-| [nextjs](./nextjs) | Next.js 14 (App Router) | `@sanwohq/web`, `@sanwohq/paystack` |
-| [vue](./vue) | Vite + Vue 3 + TypeScript | `@sanwohq/web`, `@sanwohq/paystack` |
+| Example | Framework | SDK |
+|---------|-----------|-----|
+| [vanilla-js](./vanilla-js) | Vite + Vanilla JS | `@sanwohq/web` |
+| [react](./react) | Vite + React + TypeScript | `@sanwohq/react` |
+| [nextjs](./nextjs) | Next.js 14 (App Router) | `@sanwohq/web` |
+| [vue](./vue) | Vite + Vue 3 + TypeScript | `@sanwohq/web` |
+| [react-native](./react-native) | React Native CLI | `@sanwohq/react-native` |
+| [flutter](./flutter) | Flutter + Dart | `sanwo_flutter` |
+| [android](./android) | Android + Kotlin | `com.github.Sanwohq.android` |
+| [ios](./ios) | SwiftUI (iOS 15+) | `Sanwo` (SPM) |
 
 ## Getting Started
 
@@ -43,6 +47,14 @@ const result = await sanwo({
 });
 ```
 
+## Supported Providers
+
+All examples demonstrate these 5 providers: Paystack, Flutterwave, Razorpay, Monnify, Interswitch.
+
 ## Requirements
 
-- Node.js 22+
+- **Web examples**: Node.js 22+
+- **React Native**: React Native CLI, Xcode/Android Studio
+- **Flutter**: Flutter SDK 3.10+
+- **Android**: Android Studio, JDK 17
+- **iOS**: Xcode 15+, iOS 15+
