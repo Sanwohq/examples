@@ -139,6 +139,7 @@ const scenarios: Record<string, ScenarioConfig> = {
     currency: "NGN",
     sanwoProviderOptions: {
       payItemId: (import.meta.env.VITE_INTERSWITCH_PAY_ITEM_ID as string) || "",
+      siteRedirectUrl: window.location.href,
     },
   },
 };

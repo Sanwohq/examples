@@ -151,6 +151,7 @@ export const SCENARIOS: ScenarioConfig[] = [
     currency: "NGN",
     sanwoProviderOptions: {
       payItemId: import.meta.env.VITE_INTERSWITCH_PAY_ITEM_ID ?? "",
+      siteRedirectUrl: window.location.href,
     },
   },
 ];

@@ -152,6 +152,7 @@ const SCENARIOS: Scenario[] = [
     currency: "NGN",
     sanwoProviderOptions: {
       payItemId: process.env.NEXT_PUBLIC_INTERSWITCH_PAY_ITEM_ID ?? "",
+      siteRedirectUrl: typeof window !== "undefined" ? window.location.href : "",
     },
   },
 ];
