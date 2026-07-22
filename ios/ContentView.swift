@@ -6,97 +6,192 @@ import SanwoRazorpay
 import SanwoMonnify
 import SanwoInterswitch
 
-// MARK: - Provider configuration
+// MARK: - Scenario configuration
 
-/// Each provider needs its own Sanwo instance with the matching public key.
-/// Replace the placeholder keys with your real test keys.
-enum PaymentProvider: String, CaseIterable, Identifiable {
-    case paystack     = "Paystack"
-    case flutterwave  = "Flutterwave"
-    case razorpay     = "Razorpay"
-    case monnify      = "Monnify"
-    case interswitch  = "Interswitch"
+struct Scenario: Identifiable, Hashable {
+    let id: String
+    let label: String
+    let description: String
+    let group: String
+    let provider: SanwoProviderDefinition
+    let publicKey: String
+    let currency: String
+    let extraOptions: [String: Any]
 
-    var id: String { rawValue }
-
-    /// The default currency for this provider.
-    var defaultCurrency: String {
-        switch self {
-        case .razorpay: return "INR"
-        default:        return "NGN"
-        }
-    }
-
-    /// Creates a configured `Sanwo` instance for this provider.
-    func makeSanwo() -> Sanwo {
-        switch self {
-        case .paystack:
-            return Sanwo(provider: paystackProvider, publicKey: "pk_test_your_paystack_key")
-        case .flutterwave:
-            return Sanwo(provider: flutterwaveProvider, publicKey: "FLWPUBK_TEST-your_flutterwave_key")
-        case .razorpay:
-            return Sanwo(provider: razorpayProvider, publicKey: "rzp_test_your_razorpay_key")
-        case .monnify:
-            return Sanwo(provider: monnifyProvider, publicKey: "MK_TEST_your_monnify_key")
-        case .interswitch:
-            return Sanwo(provider: interswitchProvider, publicKey: "your_interswitch_merchant_code")
-        }
-    }
+    static func == (lhs: Scenario, rhs: Scenario) -> Bool { lhs.id == rhs.id }
+    func hash(into hasher: inout Hasher) { hasher.combine(id) }
 }
+
+let kPaystackPublicKey = "pk_test_09659224f31a77f7370044ad9e69dede7dd177e1"
+let kFlutterwavePublicKey = "FLWPUBK_TEST-9b27878d10450bee730880c3064dce82-X"
+let kRazorpayKeyId = "rzp_test_NG25191hleuEtf"
+let kMonnifyApiKey = "MK_TEST_NXM9TBLPUE"
+let kMonnifyContractCode = "2403120008"
+let kInterswitchMerchantCode = "MX007"
+let kInterswitchPayItemId = "101007"
+let kInterswitchRedirectUrl = "https://localhost"
+
+let scenarios: [Scenario] = [
+    // ── Paystack ──────────────────────────────────────────────
+    Scenario(
+        id: "paystack-checkout",
+        label: "Paystack — Checkout",
+        description: "Standard Paystack checkout popup",
+        group: "Paystack",
+        provider: paystackProvider,
+        publicKey: kPaystackPublicKey,
+        currency: "NGN",
+        extraOptions: ["method": "checkout"]
+    ),
+    Scenario(
+        id: "paystack-new-transaction",
+        label: "Paystack — New Transaction",
+        description: "Paystack new transaction flow",
+        group: "Paystack",
+        provider: paystackProvider,
+        publicKey: kPaystackPublicKey,
+        currency: "NGN",
+        extraOptions: ["method": "newTransaction"]
+    ),
+    Scenario(
+        id: "paystack-card-only",
+        label: "Paystack — Card Only",
+        description: "Paystack checkout limited to card payments",
+        group: "Paystack",
+        provider: paystackProvider,
+        publicKey: kPaystackPublicKey,
+        currency: "NGN",
+        extraOptions: ["method": "checkout", "channels": ["card"]]
+    ),
+    Scenario(
+        id: "paystack-bank-transfer",
+        label: "Paystack — Bank Transfer",
+        description: "Paystack checkout limited to bank transfer",
+        group: "Paystack",
+        provider: paystackProvider,
+        publicKey: kPaystackPublicKey,
+        currency: "NGN",
+        extraOptions: ["method": "checkout", "channels": ["bank_transfer"]]
+    ),
+
+    // ── Flutterwave ───────────────────────────────────────────
+    Scenario(
+        id: "flutterwave-standard",
+        label: "Flutterwave — Standard",
+        description: "Standard Flutterwave checkout",
+        group: "Flutterwave",
+        provider: flutterwaveProvider,
+        publicKey: kFlutterwavePublicKey,
+        currency: "NGN",
+        extraOptions: [:]
+    ),
+    Scenario(
+        id: "flutterwave-card-only",
+        label: "Flutterwave — Card Only",
+        description: "Flutterwave checkout limited to card payments",
+        group: "Flutterwave",
+        provider: flutterwaveProvider,
+        publicKey: kFlutterwavePublicKey,
+        currency: "NGN",
+        extraOptions: ["paymentOptions": "card"]
+    ),
+
+    // ── Razorpay ──────────────────────────────────────────────
+    Scenario(
+        id: "razorpay-standard",
+        label: "Razorpay — Standard",
+        description: "Standard Razorpay checkout",
+        group: "Razorpay",
+        provider: razorpayProvider,
+        publicKey: kRazorpayKeyId,
+        currency: "INR",
+        extraOptions: [:]
+    ),
+
+    // ── Monnify ───────────────────────────────────────────────
+    Scenario(
+        id: "monnify-standard",
+        label: "Monnify — Standard",
+        description: "Standard Monnify checkout",
+        group: "Monnify",
+        provider: monnifyProvider,
+        publicKey: kMonnifyApiKey,
+        currency: "NGN",
+        extraOptions: ["contractCode": kMonnifyContractCode, "isTestMode": true]
+    ),
+    Scenario(
+        id: "monnify-card-only",
+        label: "Monnify — Card Only",
+        description: "Monnify checkout limited to card payments",
+        group: "Monnify",
+        provider: monnifyProvider,
+        publicKey: kMonnifyApiKey,
+        currency: "NGN",
+        extraOptions: [
+            "contractCode": kMonnifyContractCode,
+            "isTestMode": true,
+            "paymentMethods": ["CARD"],
+        ]
+    ),
+    Scenario(
+        id: "monnify-bank-transfer",
+        label: "Monnify — Bank Transfer Only",
+        description: "Monnify checkout limited to bank transfer",
+        group: "Monnify",
+        provider: monnifyProvider,
+        publicKey: kMonnifyApiKey,
+        currency: "NGN",
+        extraOptions: [
+            "contractCode": kMonnifyContractCode,
+            "isTestMode": true,
+            "paymentMethods": ["ACCOUNT_TRANSFER"],
+        ]
+    ),
+
+    // ── Interswitch ───────────────────────────────────────────
+    Scenario(
+        id: "interswitch-standard",
+        label: "Interswitch — Standard",
+        description: "Standard Interswitch checkout",
+        group: "Interswitch",
+        provider: interswitchProvider,
+        publicKey: kInterswitchMerchantCode,
+        currency: "NGN",
+        extraOptions: [
+            "payItemId": kInterswitchPayItemId,
+            "siteRedirectUrl": kInterswitchRedirectUrl,
+        ]
+    ),
+]
 
 // MARK: - Main view
 
 struct ContentView: View {
-    @State private var selectedProvider: PaymentProvider = .paystack
-    @State private var email = ""
-    @State private var amount = ""
+    @State private var selectedScenario: Scenario = scenarios[0]
+    @State private var email = "customer@example.com"
+    @State private var amount = "5000"
     @State private var showCheckout = false
 
-    // Alert state
     @State private var alertTitle = ""
     @State private var alertMessage = ""
     @State private var showAlert = false
 
-    /// Builds checkout options based on the selected provider and form inputs.
     private var checkoutOptions: CheckoutOptions {
         let minorAmount = Int((Double(amount) ?? 0) * 100)
-
-        var options = CheckoutOptions(
+        return CheckoutOptions(
             amount: minorAmount,
-            currency: selectedProvider.defaultCurrency,
+            currency: selectedScenario.currency,
             customer: CheckoutCustomer(email: email),
-            metadata: providerMetadata
+            metadata: selectedScenario.extraOptions.isEmpty ? nil : selectedScenario.extraOptions
+        )
+    }
+
+    private var sanwo: Sanwo {
+        let instance = Sanwo(
+            provider: selectedScenario.provider,
+            publicKey: selectedScenario.publicKey
         )
 
-        return options
-    }
-
-    /// Provider-specific metadata.
-    /// Monnify needs `contractCode` and `isTestMode`.
-    /// Interswitch needs `payItemId` and `siteRedirectUrl`.
-    private var providerMetadata: [String: Any]? {
-        switch selectedProvider {
-        case .monnify:
-            return [
-                "contractCode": "your_monnify_contract_code",
-                "isTestMode": true
-            ]
-        case .interswitch:
-            return [
-                "payItemId": "your_interswitch_pay_item_id",
-                "siteRedirectUrl": "https://your-app.com/redirect"
-            ]
-        default:
-            return nil
-        }
-    }
-
-    /// The Sanwo instance for the currently selected provider.
-    /// Recreated when the provider changes so the correct SDK + key are used.
-    private var sanwo: Sanwo {
-        let instance = selectedProvider.makeSanwo()
-
-        // Register event handlers (chainable, @discardableResult)
         instance
             .on(.loaded) { event in
                 print("[\(event.provider)] Checkout loaded")
@@ -114,44 +209,93 @@ struct ContentView: View {
         return instance
     }
 
+    // Group scenarios by their group name for display
+    private var groupedScenarios: [(key: String, values: [Scenario])] {
+        var groups: [(key: String, values: [Scenario])] = []
+        var seen: [String: Int] = [:]
+        for scenario in scenarios {
+            if let idx = seen[scenario.group] {
+                groups[idx].values.append(scenario)
+            } else {
+                seen[scenario.group] = groups.count
+                groups.append((key: scenario.group, values: [scenario]))
+            }
+        }
+        return groups
+    }
+
     var body: some View {
         NavigationStack {
-            Form {
-                // Provider picker
-                Section("Payment Provider") {
-                    Picker("Provider", selection: $selectedProvider) {
-                        ForEach(PaymentProvider.allCases) { provider in
-                            Text(provider.rawValue).tag(provider)
+            VStack(spacing: 0) {
+                // ── Scenario list ─────────────────────────────
+                List {
+                    ForEach(groupedScenarios, id: \.key) { group in
+                        Section(group.key) {
+                            ForEach(group.values) { scenario in
+                                Button {
+                                    selectedScenario = scenario
+                                } label: {
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(scenario.label)
+                                                .font(.subheadline)
+                                                .fontWeight(selectedScenario == scenario ? .semibold : .regular)
+                                                .foregroundStyle(.primary)
+                                            Text(scenario.description)
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                        }
+                                        Spacer()
+                                        if selectedScenario == scenario {
+                                            Image(systemName: "checkmark.circle.fill")
+                                                .foregroundStyle(.blue)
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
-                    .pickerStyle(.menu)
                 }
+                .listStyle(.insetGrouped)
 
-                // Customer details
-                Section("Payment Details") {
-                    TextField("Email", text: $email)
-                        .keyboardType(.emailAddress)
-                        .textContentType(.emailAddress)
-                        .autocapitalization(.none)
+                Divider()
 
-                    TextField("Amount (\(selectedProvider.defaultCurrency))", text: $amount)
-                        .keyboardType(.decimalPad)
-                }
+                // ── Checkout form ─────────────────────────────
+                VStack(spacing: 12) {
+                    Text(selectedScenario.label)
+                        .font(.headline)
+                    Text(selectedScenario.description)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
 
-                // Pay button
-                Section {
+                    HStack(spacing: 12) {
+                        TextField("Email", text: $email)
+                            .keyboardType(.emailAddress)
+                            .textContentType(.emailAddress)
+                            .autocapitalization(.none)
+                            .textFieldStyle(.roundedBorder)
+
+                        TextField(selectedScenario.currency, text: $amount)
+                            .keyboardType(.decimalPad)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(width: 100)
+                    }
+
                     Button {
                         showCheckout = true
                     } label: {
                         HStack {
                             Spacer()
-                            Text("Pay with \(selectedProvider.rawValue)")
+                            Text("Pay with \(selectedScenario.group)")
                                 .fontWeight(.semibold)
                             Spacer()
                         }
+                        .padding(.vertical, 8)
                     }
+                    .buttonStyle(.borderedProminent)
                     .disabled(email.isEmpty || amount.isEmpty)
                 }
+                .padding()
             }
             .navigationTitle("Sanwo Example")
             .sanwoCheckout(

@@ -6,84 +6,175 @@ import 'package:sanwo_razorpay/sanwo_razorpay.dart';
 import 'package:sanwo_monnify/sanwo_monnify.dart';
 import 'package:sanwo_interswitch/sanwo_interswitch.dart';
 
-// ---------------------------------------------------------------------------
-// Replace these with your actual test keys from each provider's dashboard.
-// ---------------------------------------------------------------------------
-const kPaystackPublicKey = 'pk_test_your_paystack_key_here';
-const kFlutterwavePublicKey = 'FLWPUBK_TEST-your_flutterwave_key_here';
-const kRazorpayKeyId = 'rzp_test_your_razorpay_key_here';
-const kMonnifyApiKey = 'MK_TEST_your_monnify_key_here';
-const kMonnifyContractCode = 'your_monnify_contract_code';
-const kInterswitchMerchantCode = 'your_interswitch_merchant_code';
-const kInterswitchPayItemId = 'Default_Payable_MX12345';
-const kInterswitchRedirectUrl = 'https://your-site.com/callback';
+const kPaystackPublicKey = 'pk_test_09659224f31a77f7370044ad9e69dede7dd177e1';
+const kFlutterwavePublicKey = 'FLWPUBK_TEST-9b27878d10450bee730880c3064dce82-X';
+const kRazorpayKeyId = 'rzp_test_NG25191hleuEtf';
+const kMonnifyApiKey = 'MK_TEST_NXM9TBLPUE';
+const kMonnifyContractCode = '2403120008';
+const kInterswitchMerchantCode = 'MX007';
+const kInterswitchPayItemId = '101007';
+const kInterswitchRedirectUrl = 'https://localhost';
 
-// ---------------------------------------------------------------------------
-// Provider configuration
-// ---------------------------------------------------------------------------
+class Scenario {
+  const Scenario({
+    required this.id,
+    required this.label,
+    required this.description,
+    required this.group,
+    required this.provider,
+    required this.publicKey,
+    required this.currency,
+    this.extra,
+    this.method,
+    this.channels,
+    this.paymentOptions,
+  });
 
-enum PaymentProvider {
-  paystack('Paystack', 'NGN'),
-  flutterwave('Flutterwave', 'NGN'),
-  razorpay('Razorpay', 'INR'),
-  monnify('Monnify', 'NGN'),
-  interswitch('Interswitch', 'NGN');
-
-  const PaymentProvider(this.label, this.currency);
+  final String id;
   final String label;
+  final String description;
+  final String group;
+  final SanwoProviderDefinition provider;
+  final String publicKey;
   final String currency;
+  final Map<String, dynamic>? extra;
+  final String? method;
+  final List<String>? channels;
+  final String? paymentOptions;
 }
 
-SanwoProviderDefinition _providerDefinition(PaymentProvider p) {
-  switch (p) {
-    case PaymentProvider.paystack:
-      return paystackProvider;
-    case PaymentProvider.flutterwave:
-      return flutterwaveProvider;
-    case PaymentProvider.razorpay:
-      return razorpayProvider;
-    case PaymentProvider.monnify:
-      return monnifyProvider;
-    case PaymentProvider.interswitch:
-      return interswitchProvider;
-  }
-}
+final scenarios = <Scenario>[
+  // ── Paystack ──────────────────────────────────────────────
+  Scenario(
+    id: 'paystack-checkout',
+    label: 'Paystack — Checkout',
+    description: 'Standard Paystack checkout popup',
+    group: 'Paystack',
+    provider: paystackProvider,
+    publicKey: kPaystackPublicKey,
+    currency: 'NGN',
+    method: 'checkout',
+  ),
+  Scenario(
+    id: 'paystack-new-transaction',
+    label: 'Paystack — New Transaction',
+    description: 'Paystack new transaction flow',
+    group: 'Paystack',
+    provider: paystackProvider,
+    publicKey: kPaystackPublicKey,
+    currency: 'NGN',
+    method: 'newTransaction',
+  ),
+  Scenario(
+    id: 'paystack-card-only',
+    label: 'Paystack — Card Only',
+    description: 'Paystack checkout limited to card payments',
+    group: 'Paystack',
+    provider: paystackProvider,
+    publicKey: kPaystackPublicKey,
+    currency: 'NGN',
+    method: 'checkout',
+    channels: ['card'],
+  ),
+  Scenario(
+    id: 'paystack-bank-transfer',
+    label: 'Paystack — Bank Transfer',
+    description: 'Paystack checkout limited to bank transfer',
+    group: 'Paystack',
+    provider: paystackProvider,
+    publicKey: kPaystackPublicKey,
+    currency: 'NGN',
+    method: 'checkout',
+    channels: ['bank_transfer'],
+  ),
 
-String _publicKey(PaymentProvider p) {
-  switch (p) {
-    case PaymentProvider.paystack:
-      return kPaystackPublicKey;
-    case PaymentProvider.flutterwave:
-      return kFlutterwavePublicKey;
-    case PaymentProvider.razorpay:
-      return kRazorpayKeyId;
-    case PaymentProvider.monnify:
-      return kMonnifyApiKey;
-    case PaymentProvider.interswitch:
-      return kInterswitchMerchantCode;
-  }
-}
+  // ── Flutterwave ───────────────────────────────────────────
+  Scenario(
+    id: 'flutterwave-standard',
+    label: 'Flutterwave — Standard',
+    description: 'Standard Flutterwave checkout',
+    group: 'Flutterwave',
+    provider: flutterwaveProvider,
+    publicKey: kFlutterwavePublicKey,
+    currency: 'NGN',
+  ),
+  Scenario(
+    id: 'flutterwave-card-only',
+    label: 'Flutterwave — Card Only',
+    description: 'Flutterwave checkout limited to card payments',
+    group: 'Flutterwave',
+    provider: flutterwaveProvider,
+    publicKey: kFlutterwavePublicKey,
+    currency: 'NGN',
+    paymentOptions: 'card',
+  ),
 
-Map<String, dynamic>? _extraOptions(PaymentProvider p) {
-  switch (p) {
-    case PaymentProvider.monnify:
-      return {
-        'contractCode': kMonnifyContractCode,
-        'isTestMode': true,
-      };
-    case PaymentProvider.interswitch:
-      return {
-        'payItemId': kInterswitchPayItemId,
-        'siteRedirectUrl': kInterswitchRedirectUrl,
-      };
-    default:
-      return null;
-  }
-}
+  // ── Razorpay ──────────────────────────────────────────────
+  Scenario(
+    id: 'razorpay-standard',
+    label: 'Razorpay — Standard',
+    description: 'Standard Razorpay checkout',
+    group: 'Razorpay',
+    provider: razorpayProvider,
+    publicKey: kRazorpayKeyId,
+    currency: 'INR',
+  ),
 
-// ---------------------------------------------------------------------------
-// App
-// ---------------------------------------------------------------------------
+  // ── Monnify ───────────────────────────────────────────────
+  Scenario(
+    id: 'monnify-standard',
+    label: 'Monnify — Standard',
+    description: 'Standard Monnify checkout',
+    group: 'Monnify',
+    provider: monnifyProvider,
+    publicKey: kMonnifyApiKey,
+    currency: 'NGN',
+    extra: {'contractCode': kMonnifyContractCode, 'isTestMode': true},
+  ),
+  Scenario(
+    id: 'monnify-card-only',
+    label: 'Monnify — Card Only',
+    description: 'Monnify checkout limited to card payments',
+    group: 'Monnify',
+    provider: monnifyProvider,
+    publicKey: kMonnifyApiKey,
+    currency: 'NGN',
+    extra: {
+      'contractCode': kMonnifyContractCode,
+      'isTestMode': true,
+      'paymentMethods': ['CARD'],
+    },
+  ),
+  Scenario(
+    id: 'monnify-bank-transfer',
+    label: 'Monnify — Bank Transfer Only',
+    description: 'Monnify checkout limited to bank transfer',
+    group: 'Monnify',
+    provider: monnifyProvider,
+    publicKey: kMonnifyApiKey,
+    currency: 'NGN',
+    extra: {
+      'contractCode': kMonnifyContractCode,
+      'isTestMode': true,
+      'paymentMethods': ['ACCOUNT_TRANSFER'],
+    },
+  ),
+
+  // ── Interswitch ───────────────────────────────────────────
+  Scenario(
+    id: 'interswitch-standard',
+    label: 'Interswitch — Standard',
+    description: 'Standard Interswitch checkout',
+    group: 'Interswitch',
+    provider: interswitchProvider,
+    publicKey: kInterswitchMerchantCode,
+    currency: 'NGN',
+    extra: {
+      'payItemId': kInterswitchPayItemId,
+      'siteRedirectUrl': kInterswitchRedirectUrl,
+    },
+  ),
+];
 
 void main() {
   runApp(const SanwoExampleApp());
@@ -116,7 +207,7 @@ class CheckoutPage extends StatefulWidget {
 class _CheckoutPageState extends State<CheckoutPage> {
   final _emailController = TextEditingController(text: 'customer@example.com');
   final _amountController = TextEditingController(text: '5000');
-  PaymentProvider _selectedProvider = PaymentProvider.paystack;
+  int _selectedIndex = 0;
   bool _loading = false;
 
   @override
@@ -125,6 +216,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
     _amountController.dispose();
     super.dispose();
   }
+
+  Scenario get _selected => scenarios[_selectedIndex];
 
   Future<void> _pay() async {
     final email = _emailController.text.trim();
@@ -141,16 +234,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
       return;
     }
 
-    // Convert to minor units (e.g. kobo, paise).
     final amountMinor = (amountMajor * 100).round();
 
-    // Create a Sanwo instance for the selected provider.
     final sanwo = Sanwo(
-      provider: _providerDefinition(_selectedProvider),
-      publicKey: _publicKey(_selectedProvider),
+      provider: _selected.provider,
+      publicKey: _selected.publicKey,
     );
 
-    // Register event listeners for logging / analytics.
     sanwo.on(SanwoEvent.loaded, (data) {
       debugPrint('Sanwo [loaded]: $data');
     });
@@ -169,25 +259,25 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
     setState(() => _loading = true);
 
-    // Start the checkout flow.
     final result = await sanwo(
       context: context,
       options: CheckoutOptions(
         amount: amountMinor,
-        currency: _selectedProvider.currency,
+        currency: _selected.currency,
         customer: CheckoutCustomer(email: email),
         description: 'Sanwo example payment',
-        extra: _extraOptions(_selectedProvider),
+        method: _selected.method,
+        channels: _selected.channels,
+        paymentOptions: _selected.paymentOptions,
+        extra: _selected.extra,
       ),
     );
 
-    // Clean up listeners.
     sanwo.removeAllListeners();
 
     if (!mounted) return;
     setState(() => _loading = false);
 
-    // Show the result.
     switch (result.status) {
       case CheckoutStatus.successful:
         _showResultDialog(
@@ -233,84 +323,166 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   @override
   Widget build(BuildContext context) {
+    final groups = <String, List<int>>{};
+    for (var i = 0; i < scenarios.length; i++) {
+      groups.putIfAbsent(scenarios[i].group, () => []).add(i);
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text('Sanwo Flutter Example')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Provider selector
-            DropdownButtonFormField<PaymentProvider>(
-              value: _selectedProvider,
-              decoration: const InputDecoration(
-                labelText: 'Payment Provider',
-                border: OutlineInputBorder(),
-              ),
-              items: PaymentProvider.values
-                  .map((p) => DropdownMenuItem(
-                        value: p,
-                        child: Text(p.label),
-                      ))
-                  .toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() => _selectedProvider = value);
-                }
-              },
+      body: Column(
+        children: [
+          // ── Scenario list ────────────────────────────────
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              children: [
+                for (final group in groups.entries) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16, bottom: 4),
+                    child: Text(
+                      group.key,
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelLarge
+                          ?.copyWith(color: Theme.of(context).colorScheme.primary),
+                    ),
+                  ),
+                  for (final idx in group.value)
+                    _ScenarioTile(
+                      scenario: scenarios[idx],
+                      selected: idx == _selectedIndex,
+                      onTap: () => setState(() => _selectedIndex = idx),
+                    ),
+                ],
+              ],
             ),
-            const SizedBox(height: 16),
+          ),
 
-            // Email field
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(),
-                hintText: 'customer@example.com',
-              ),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 16),
+          const Divider(height: 1),
 
-            // Amount field
-            TextField(
-              controller: _amountController,
-              decoration: InputDecoration(
-                labelText: 'Amount (${_selectedProvider.currency})',
-                border: const OutlineInputBorder(),
-                hintText: '5000',
-              ),
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-            ),
-            const SizedBox(height: 24),
+          // ── Checkout form ────────────────────────────────
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  _selected.label,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _selected.description,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 12),
 
-            // Pay button
-            FilledButton.icon(
-              onPressed: _loading ? null : _pay,
-              icon: _loading
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _emailController,
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          border: OutlineInputBorder(),
+                          isDense: true,
+                        ),
+                        keyboardType: TextInputType.emailAddress,
                       ),
-                    )
-                  : const Icon(Icons.payment),
-              label: Text(
-                _loading
-                    ? 'Processing...'
-                    : 'Pay with ${_selectedProvider.label}',
-              ),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(52),
-                textStyle: const TextStyle(fontSize: 16),
-              ),
+                    ),
+                    const SizedBox(width: 12),
+                    SizedBox(
+                      width: 120,
+                      child: TextField(
+                        controller: _amountController,
+                        decoration: InputDecoration(
+                          labelText: _selected.currency,
+                          border: const OutlineInputBorder(),
+                          isDense: true,
+                        ),
+                        keyboardType:
+                            const TextInputType.numberWithOptions(decimal: true),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                FilledButton.icon(
+                  onPressed: _loading ? null : _pay,
+                  icon: _loading
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(Icons.payment),
+                  label: Text(
+                    _loading
+                        ? 'Processing...'
+                        : 'Pay with ${_selected.group}',
+                  ),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ScenarioTile extends StatelessWidget {
+  const _ScenarioTile({
+    required this.scenario,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final Scenario scenario;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Card(
+      elevation: 0,
+      color: selected ? scheme.primaryContainer : scheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: selected
+            ? BorderSide(color: scheme.primary, width: 1.5)
+            : BorderSide.none,
+      ),
+      child: ListTile(
+        dense: true,
+        title: Text(
+          scenario.label,
+          style: TextStyle(
+            fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+            color: selected ? scheme.onPrimaryContainer : null,
+          ),
         ),
+        subtitle: Text(
+          scenario.description,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: selected
+                    ? scheme.onPrimaryContainer.withValues(alpha: 0.7)
+                    : null,
+              ),
+        ),
+        trailing: selected
+            ? Icon(Icons.check_circle, color: scheme.primary, size: 20)
+            : null,
+        onTap: onTap,
       ),
     );
   }
