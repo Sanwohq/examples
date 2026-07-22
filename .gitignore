@@ -8,3 +8,20 @@ dist/
 .env*.local
 package-lock.json
 *.tsbuildinfo
+
+# Flutter
+flutter/.dart_tool/
+flutter/build/
+flutter/.flutter-plugins
+flutter/.flutter-plugins-dependencies
+flutter/pubspec.lock
+
+# iOS
+ios/*.xcodeproj
+ios/*.xcworkspace
+ios/Pods/
+
+# Android
+android/.gradle/
+android/build/
+android/local.properties

@@ -9,9 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  sanwo_flutter: ^0.1.0
-  sanwo_paystack: ^0.1.0
-  sanwo_flutterwave: ^0.1.0
-  sanwo_razorpay: ^0.1.0
-  sanwo_monnify: ^0.1.0
-  sanwo_interswitch: ^0.1.0
+  sanwo_flutter: ^0.1.1
+  sanwo_paystack: ^0.1.1
+  sanwo_flutterwave: ^0.1.1
+  sanwo_razorpay: ^0.1.1
+  sanwo_monnify: ^0.1.1
+  sanwo_interswitch: ^0.1.1
