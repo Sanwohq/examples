@@ -1,15 +1,17 @@
 package com.example.sanwocheckout
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
-import com.sanwohq.core.Sanwo
-import com.sanwohq.core.SanwoEvent
-import com.sanwohq.core.CheckoutOptions
-import com.sanwohq.core.CheckoutResult
+import com.sanwohq.android.Sanwo
+import com.sanwohq.android.SanwoEvent
+import com.sanwohq.android.CheckoutOptions
+import com.sanwohq.android.CheckoutCustomer
+import com.sanwohq.android.CheckoutResult
 import com.sanwohq.paystack.paystackProvider
 import com.sanwohq.flutterwave.flutterwaveProvider
 import com.sanwohq.razorpay.razorpayProvider
@@ -18,29 +20,30 @@ import com.sanwohq.interswitch.interswitchProvider
 
 class MainActivity : AppCompatActivity() {
 
-    // ── Scenario configuration ────────────────────────────────
     data class Scenario(
         val id: String,
         val label: String,
         val description: String,
         val group: String,
-        val provider: Any,
+        val provider: com.sanwohq.android.SanwoProvider,
         val publicKey: String,
         val currency: String,
-        val extraOptions: Map<String, Any> = emptyMap(),
+        val method: String? = null,
+        val channels: List<String>? = null,
+        val paymentOptions: String? = null,
+        val extra: Map<String, Any?> = emptyMap(),
     )
 
     private val scenarios = listOf(
-        // ── Paystack ──────────────────────────────────────────
         Scenario(
             id = "paystack-checkout",
             label = "Paystack — Checkout",
             description = "Standard Paystack checkout popup",
             group = "Paystack",
             provider = paystackProvider,
-            publicKey = "YOUR_PAYSTACK_PUBLIC_KEY",
+            publicKey = Config.PAYSTACK_PUBLIC_KEY,
             currency = "NGN",
-            extraOptions = mapOf("method" to "checkout"),
+            method = "checkout",
         ),
         Scenario(
             id = "paystack-new-transaction",
@@ -48,9 +51,9 @@ class MainActivity : AppCompatActivity() {
             description = "Paystack new transaction flow",
             group = "Paystack",
             provider = paystackProvider,
-            publicKey = "YOUR_PAYSTACK_PUBLIC_KEY",
+            publicKey = Config.PAYSTACK_PUBLIC_KEY,
             currency = "NGN",
-            extraOptions = mapOf("method" to "newTransaction"),
+            method = "newTransaction",
         ),
         Scenario(
             id = "paystack-card-only",
@@ -58,9 +61,10 @@ class MainActivity : AppCompatActivity() {
             description = "Paystack checkout limited to card payments",
             group = "Paystack",
             provider = paystackProvider,
-            publicKey = "YOUR_PAYSTACK_PUBLIC_KEY",
+            publicKey = Config.PAYSTACK_PUBLIC_KEY,
             currency = "NGN",
-            extraOptions = mapOf("method" to "checkout", "channels" to listOf("card")),
+            method = "checkout",
+            channels = listOf("card"),
         ),
         Scenario(
             id = "paystack-bank-transfer",
@@ -68,19 +72,19 @@ class MainActivity : AppCompatActivity() {
             description = "Paystack checkout limited to bank transfer",
             group = "Paystack",
             provider = paystackProvider,
-            publicKey = "YOUR_PAYSTACK_PUBLIC_KEY",
+            publicKey = Config.PAYSTACK_PUBLIC_KEY,
             currency = "NGN",
-            extraOptions = mapOf("method" to "checkout", "channels" to listOf("bank_transfer")),
+            method = "checkout",
+            channels = listOf("bank_transfer"),
         ),
 
-        // ── Flutterwave ───────────────────────────────────────
         Scenario(
             id = "flutterwave-standard",
             label = "Flutterwave — Standard",
             description = "Standard Flutterwave checkout",
             group = "Flutterwave",
             provider = flutterwaveProvider,
-            publicKey = "YOUR_FLUTTERWAVE_PUBLIC_KEY",
+            publicKey = Config.FLUTTERWAVE_PUBLIC_KEY,
             currency = "NGN",
         ),
         Scenario(
@@ -89,32 +93,30 @@ class MainActivity : AppCompatActivity() {
             description = "Flutterwave checkout limited to card payments",
             group = "Flutterwave",
             provider = flutterwaveProvider,
-            publicKey = "YOUR_FLUTTERWAVE_PUBLIC_KEY",
+            publicKey = Config.FLUTTERWAVE_PUBLIC_KEY,
             currency = "NGN",
-            extraOptions = mapOf("paymentOptions" to "card"),
+            paymentOptions = "card",
         ),
 
-        // ── Razorpay ──────────────────────────────────────────
         Scenario(
             id = "razorpay-standard",
             label = "Razorpay — Standard",
             description = "Standard Razorpay checkout",
             group = "Razorpay",
             provider = razorpayProvider,
-            publicKey = "YOUR_RAZORPAY_KEY_ID",
+            publicKey = Config.RAZORPAY_KEY_ID,
             currency = "INR",
         ),
 
-        // ── Monnify ───────────────────────────────────────────
         Scenario(
             id = "monnify-standard",
             label = "Monnify — Standard",
             description = "Standard Monnify checkout",
             group = "Monnify",
             provider = monnifyProvider,
-            publicKey = "YOUR_MONNIFY_API_KEY",
+            publicKey = Config.MONNIFY_API_KEY,
             currency = "NGN",
-            extraOptions = mapOf("contractCode" to "YOUR_MONNIFY_CONTRACT_CODE", "isTestMode" to true),
+            extra = mapOf("contractCode" to Config.MONNIFY_CONTRACT_CODE, "isTestMode" to true),
         ),
         Scenario(
             id = "monnify-card-only",
@@ -122,10 +124,10 @@ class MainActivity : AppCompatActivity() {
             description = "Monnify checkout limited to card payments",
             group = "Monnify",
             provider = monnifyProvider,
-            publicKey = "YOUR_MONNIFY_API_KEY",
+            publicKey = Config.MONNIFY_API_KEY,
             currency = "NGN",
-            extraOptions = mapOf(
-                "contractCode" to "YOUR_MONNIFY_CONTRACT_CODE",
+            extra = mapOf(
+                "contractCode" to Config.MONNIFY_CONTRACT_CODE,
                 "isTestMode" to true,
                 "paymentMethods" to listOf("CARD"),
             ),
@@ -136,37 +138,33 @@ class MainActivity : AppCompatActivity() {
             description = "Monnify checkout limited to bank transfer",
             group = "Monnify",
             provider = monnifyProvider,
-            publicKey = "YOUR_MONNIFY_API_KEY",
+            publicKey = Config.MONNIFY_API_KEY,
             currency = "NGN",
-            extraOptions = mapOf(
-                "contractCode" to "YOUR_MONNIFY_CONTRACT_CODE",
+            extra = mapOf(
+                "contractCode" to Config.MONNIFY_CONTRACT_CODE,
                 "isTestMode" to true,
                 "paymentMethods" to listOf("ACCOUNT_TRANSFER"),
             ),
         ),
 
-        // ── Interswitch ───────────────────────────────────────
         Scenario(
             id = "interswitch-standard",
             label = "Interswitch — Standard",
             description = "Standard Interswitch checkout",
             group = "Interswitch",
             provider = interswitchProvider,
-            publicKey = "YOUR_INTERSWITCH_MERCHANT_CODE",
+            publicKey = Config.INTERSWITCH_MERCHANT_CODE,
             currency = "NGN",
-            extraOptions = mapOf(
-                "payItemId" to "YOUR_INTERSWITCH_PAY_ITEM_ID",
-                "siteRedirectUrl" to "https://localhost",
+            extra = mapOf(
+                "payItemId" to Config.INTERSWITCH_PAY_ITEM_ID,
+                "siteRedirectUrl" to Config.INTERSWITCH_REDIRECT_URL,
             ),
         ),
     )
 
-    // ── State ──────────────────────────────────────────────────
     private lateinit var sanwo: Sanwo
-    private lateinit var launcher: Any
     private var selectedScenario = 0
 
-    // ── Views ──────────────────────────────────────────────────
     private lateinit var scenarioSpinner: Spinner
     private lateinit var descriptionLabel: TextView
     private lateinit var emailInput: TextInputEditText
@@ -199,42 +197,14 @@ class MainActivity : AppCompatActivity() {
                 descriptionLabel.text = scenario.description
                 currencyLabel.text = "Amount (${scenario.currency})"
                 payButton.text = "Pay with ${scenario.group}"
-                initSanwo()
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
         payButton.setOnClickListener { startCheckout() }
-        initSanwo()
     }
 
-    // ── SDK setup ──────────────────────────────────────────────
-
-    private fun initSanwo() {
-        val scenario = scenarios[selectedScenario]
-
-        sanwo = Sanwo(
-            provider = scenario.provider,
-            publicKey = scenario.publicKey,
-        )
-
-        launcher = sanwo.registerForCheckoutResult(this) { result ->
-            handleResult(result)
-        }
-
-        sanwo.on(SanwoEvent.SUCCESS) { event ->
-            android.util.Log.d("Sanwo", "Payment successful: $event")
-        }
-        sanwo.on(SanwoEvent.CANCELLED) { event ->
-            android.util.Log.d("Sanwo", "Payment cancelled: $event")
-        }
-        sanwo.on(SanwoEvent.FAILED) { event ->
-            android.util.Log.d("Sanwo", "Payment failed: $event")
-        }
-    }
-
-    // ── Launch checkout ────────────────────────────────────────
-
+    @Suppress("DEPRECATION")
     private fun startCheckout() {
         val email = emailInput.text?.toString()?.trim().orEmpty()
         val amountText = amountInput.text?.toString()?.trim().orEmpty()
@@ -245,20 +215,43 @@ class MainActivity : AppCompatActivity() {
         }
 
         val scenario = scenarios[selectedScenario]
-        val amountInMinorUnits = (amountText.toDoubleOrNull() ?: 0.0) * 100
+        val amountInMinorUnits = ((amountText.toDoubleOrNull() ?: 0.0) * 100).toLong()
 
-        val options = CheckoutOptions(
-            amount = amountInMinorUnits.toLong(),
-            currency = scenario.currency,
-            customer = mapOf("email" to email),
-            description = "Sanwo Android example payment",
-            sanwoProviderOptions = scenario.extraOptions,
+        sanwo = Sanwo(
+            provider = scenario.provider,
+            publicKey = scenario.publicKey,
         )
 
-        sanwo.launchCheckout(this, launcher, options)
+        sanwo.on(SanwoEvent.SUCCESS) { event ->
+            android.util.Log.d("Sanwo", "Payment successful: ${event.data}")
+        }
+        sanwo.on(SanwoEvent.CANCELLED) { event ->
+            android.util.Log.d("Sanwo", "Payment cancelled: ${event.data}")
+        }
+        sanwo.on(SanwoEvent.ERROR) { event ->
+            android.util.Log.d("Sanwo", "Payment failed: ${event.data}")
+        }
+
+        val options = CheckoutOptions(
+            amount = amountInMinorUnits,
+            currency = scenario.currency,
+            customer = CheckoutCustomer(email = email),
+            method = scenario.method,
+            channels = scenario.channels,
+            paymentOptions = scenario.paymentOptions,
+            extra = scenario.extra.ifEmpty { null },
+        )
+
+        sanwo(this, options) { result ->
+            handleResult(result)
+        }
     }
 
-    // ── Result handling ────────────────────────────────────────
+    @Suppress("DEPRECATION")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        Sanwo.handleActivityResult(requestCode, resultCode, data)
+    }
 
     private fun handleResult(result: CheckoutResult) {
         when (result) {
@@ -275,7 +268,7 @@ class MainActivity : AppCompatActivity() {
             is CheckoutResult.Failed -> {
                 showDialog(
                     title = "Payment Failed",
-                    message = result.error.message ?: "An unknown error occurred",
+                    message = result.error,
                 )
             }
         }
