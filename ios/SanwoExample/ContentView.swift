@@ -13,24 +13,45 @@ struct Scenario: Identifiable, Hashable {
     let label: String
     let description: String
     let group: String
-    let provider: SanwoProviderDefinition
+    let provider: SanwoProvider
     let publicKey: String
     let currency: String
-    let extraOptions: [String: Any]
+    let method: String?
+    let channels: [String]?
+    let paymentOptions: String?
+    let metadata: [String: String]?
+
+    init(
+        id: String,
+        label: String,
+        description: String,
+        group: String,
+        provider: SanwoProvider,
+        publicKey: String,
+        currency: String,
+        method: String? = nil,
+        channels: [String]? = nil,
+        paymentOptions: String? = nil,
+        metadata: [String: String]? = nil
+    ) {
+        self.id = id
+        self.label = label
+        self.description = description
+        self.group = group
+        self.provider = provider
+        self.publicKey = publicKey
+        self.currency = currency
+        self.method = method
+        self.channels = channels
+        self.paymentOptions = paymentOptions
+        self.metadata = metadata
+    }
 
     static func == (lhs: Scenario, rhs: Scenario) -> Bool { lhs.id == rhs.id }
     func hash(into hasher: inout Hasher) { hasher.combine(id) }
 }
 
-// Copy .env.example to .env and add your keys
-let kPaystackPublicKey = "YOUR_PAYSTACK_PUBLIC_KEY"
-let kFlutterwavePublicKey = "YOUR_FLUTTERWAVE_PUBLIC_KEY"
-let kRazorpayKeyId = "YOUR_RAZORPAY_KEY_ID"
-let kMonnifyApiKey = "YOUR_MONNIFY_API_KEY"
-let kMonnifyContractCode = "YOUR_MONNIFY_CONTRACT_CODE"
-let kInterswitchMerchantCode = "YOUR_INTERSWITCH_MERCHANT_CODE"
-let kInterswitchPayItemId = "YOUR_INTERSWITCH_PAY_ITEM_ID"
-let kInterswitchRedirectUrl = "https://localhost"
+// Keys are loaded from Config.swift (gitignored) — copy Config.example.swift and add your keys
 
 let scenarios: [Scenario] = [
     // ── Paystack ──────────────────────────────────────────────
@@ -42,7 +63,7 @@ let scenarios: [Scenario] = [
         provider: paystackProvider,
         publicKey: kPaystackPublicKey,
         currency: "NGN",
-        extraOptions: ["method": "checkout"]
+        method: "checkout"
     ),
     Scenario(
         id: "paystack-new-transaction",
@@ -52,7 +73,7 @@ let scenarios: [Scenario] = [
         provider: paystackProvider,
         publicKey: kPaystackPublicKey,
         currency: "NGN",
-        extraOptions: ["method": "newTransaction"]
+        method: "newTransaction"
     ),
     Scenario(
         id: "paystack-card-only",
@@ -62,7 +83,8 @@ let scenarios: [Scenario] = [
         provider: paystackProvider,
         publicKey: kPaystackPublicKey,
         currency: "NGN",
-        extraOptions: ["method": "checkout", "channels": ["card"]]
+        method: "checkout",
+        channels: ["card"]
     ),
     Scenario(
         id: "paystack-bank-transfer",
@@ -72,7 +94,8 @@ let scenarios: [Scenario] = [
         provider: paystackProvider,
         publicKey: kPaystackPublicKey,
         currency: "NGN",
-        extraOptions: ["method": "checkout", "channels": ["bank_transfer"]]
+        method: "checkout",
+        channels: ["bank_transfer"]
     ),
 
     // ── Flutterwave ───────────────────────────────────────────
@@ -83,8 +106,7 @@ let scenarios: [Scenario] = [
         group: "Flutterwave",
         provider: flutterwaveProvider,
         publicKey: kFlutterwavePublicKey,
-        currency: "NGN",
-        extraOptions: [:]
+        currency: "NGN"
     ),
     Scenario(
         id: "flutterwave-card-only",
@@ -94,7 +116,7 @@ let scenarios: [Scenario] = [
         provider: flutterwaveProvider,
         publicKey: kFlutterwavePublicKey,
         currency: "NGN",
-        extraOptions: ["paymentOptions": "card"]
+        paymentOptions: "card"
     ),
 
     // ── Razorpay ──────────────────────────────────────────────
@@ -105,8 +127,7 @@ let scenarios: [Scenario] = [
         group: "Razorpay",
         provider: razorpayProvider,
         publicKey: kRazorpayKeyId,
-        currency: "INR",
-        extraOptions: [:]
+        currency: "INR"
     ),
 
     // ── Monnify ───────────────────────────────────────────────
@@ -118,7 +139,7 @@ let scenarios: [Scenario] = [
         provider: monnifyProvider,
         publicKey: kMonnifyApiKey,
         currency: "NGN",
-        extraOptions: ["contractCode": kMonnifyContractCode, "isTestMode": true]
+        metadata: ["contractCode": kMonnifyContractCode, "isTestMode": "true"]
     ),
     Scenario(
         id: "monnify-card-only",
@@ -128,11 +149,7 @@ let scenarios: [Scenario] = [
         provider: monnifyProvider,
         publicKey: kMonnifyApiKey,
         currency: "NGN",
-        extraOptions: [
-            "contractCode": kMonnifyContractCode,
-            "isTestMode": true,
-            "paymentMethods": ["CARD"],
-        ]
+        metadata: ["contractCode": kMonnifyContractCode, "isTestMode": "true", "paymentMethods": "CARD"]
     ),
     Scenario(
         id: "monnify-bank-transfer",
@@ -142,11 +159,7 @@ let scenarios: [Scenario] = [
         provider: monnifyProvider,
         publicKey: kMonnifyApiKey,
         currency: "NGN",
-        extraOptions: [
-            "contractCode": kMonnifyContractCode,
-            "isTestMode": true,
-            "paymentMethods": ["ACCOUNT_TRANSFER"],
-        ]
+        metadata: ["contractCode": kMonnifyContractCode, "isTestMode": "true", "paymentMethods": "ACCOUNT_TRANSFER"]
     ),
 
     // ── Interswitch ───────────────────────────────────────────
@@ -158,10 +171,7 @@ let scenarios: [Scenario] = [
         provider: interswitchProvider,
         publicKey: kInterswitchMerchantCode,
         currency: "NGN",
-        extraOptions: [
-            "payItemId": kInterswitchPayItemId,
-            "siteRedirectUrl": kInterswitchRedirectUrl,
-        ]
+        metadata: ["payItemId": kInterswitchPayItemId, "siteRedirectUrl": kInterswitchRedirectUrl]
     ),
 ]
 
@@ -183,7 +193,10 @@ struct ContentView: View {
             amount: minorAmount,
             currency: selectedScenario.currency,
             customer: CheckoutCustomer(email: email),
-            metadata: selectedScenario.extraOptions.isEmpty ? nil : selectedScenario.extraOptions
+            channels: selectedScenario.channels,
+            metadata: selectedScenario.metadata,
+            paymentOptions: selectedScenario.paymentOptions,
+            method: selectedScenario.method
         )
     }
 
@@ -210,7 +223,6 @@ struct ContentView: View {
         return instance
     }
 
-    // Group scenarios by their group name for display
     private var groupedScenarios: [(key: String, values: [Scenario])] {
         var groups: [(key: String, values: [Scenario])] = []
         var seen: [String: Int] = [:]
@@ -228,7 +240,6 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // ── Scenario list ─────────────────────────────
                 List {
                     ForEach(groupedScenarios, id: \.key) { group in
                         Section(group.key) {
@@ -261,7 +272,6 @@ struct ContentView: View {
 
                 Divider()
 
-                // ── Checkout form ─────────────────────────────
                 VStack(spacing: 12) {
                     Text(selectedScenario.label)
                         .font(.headline)
@@ -337,8 +347,6 @@ struct ContentView: View {
         showAlert = true
     }
 }
-
-// MARK: - Preview
 
 #Preview {
     ContentView()

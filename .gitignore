@@ -20,6 +20,8 @@ flutter/pubspec.lock
 ios/*.xcodeproj
 ios/*.xcworkspace
 ios/Pods/
+ios/build/
+ios/SanwoExample/Config.swift
 
 # Android
 android/.gradle/
