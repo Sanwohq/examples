@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:sanwo_flutter/sanwo_flutter.dart';
 import 'package:sanwo_paystack/sanwo_paystack.dart';
 import 'package:sanwo_flutterwave/sanwo_flutterwave.dart';
@@ -6,14 +7,14 @@ import 'package:sanwo_razorpay/sanwo_razorpay.dart';
 import 'package:sanwo_monnify/sanwo_monnify.dart';
 import 'package:sanwo_interswitch/sanwo_interswitch.dart';
 
-const kPaystackPublicKey = 'pk_test_09659224f31a77f7370044ad9e69dede7dd177e1';
-const kFlutterwavePublicKey = 'FLWPUBK_TEST-9b27878d10450bee730880c3064dce82-X';
-const kRazorpayKeyId = 'rzp_test_NG25191hleuEtf';
-const kMonnifyApiKey = 'MK_TEST_NXM9TBLPUE';
-const kMonnifyContractCode = '2403120008';
-const kInterswitchMerchantCode = 'MX007';
-const kInterswitchPayItemId = '101007';
-const kInterswitchRedirectUrl = 'https://localhost';
+String get kPaystackPublicKey => dotenv.env['PAYSTACK_PUBLIC_KEY'] ?? '';
+String get kFlutterwavePublicKey => dotenv.env['FLUTTERWAVE_PUBLIC_KEY'] ?? '';
+String get kRazorpayKeyId => dotenv.env['RAZORPAY_KEY_ID'] ?? '';
+String get kMonnifyApiKey => dotenv.env['MONNIFY_API_KEY'] ?? '';
+String get kMonnifyContractCode => dotenv.env['MONNIFY_CONTRACT_CODE'] ?? '';
+String get kInterswitchMerchantCode => dotenv.env['INTERSWITCH_MERCHANT_CODE'] ?? '';
+String get kInterswitchPayItemId => dotenv.env['INTERSWITCH_PAY_ITEM_ID'] ?? '';
+String get kInterswitchRedirectUrl => dotenv.env['INTERSWITCH_REDIRECT_URL'] ?? 'https://localhost';
 
 class Scenario {
   const Scenario({
@@ -176,7 +177,8 @@ final scenarios = <Scenario>[
   ),
 ];
 
-void main() {
+Future<void> main() async {
+  await dotenv.load(fileName: '.env');
   runApp(const SanwoExampleApp());
 }
 

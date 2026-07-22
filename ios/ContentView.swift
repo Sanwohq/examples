@@ -22,13 +22,14 @@ struct Scenario: Identifiable, Hashable {
     func hash(into hasher: inout Hasher) { hasher.combine(id) }
 }
 
-let kPaystackPublicKey = "pk_test_09659224f31a77f7370044ad9e69dede7dd177e1"
-let kFlutterwavePublicKey = "FLWPUBK_TEST-9b27878d10450bee730880c3064dce82-X"
-let kRazorpayKeyId = "rzp_test_NG25191hleuEtf"
-let kMonnifyApiKey = "MK_TEST_NXM9TBLPUE"
-let kMonnifyContractCode = "2403120008"
-let kInterswitchMerchantCode = "MX007"
-let kInterswitchPayItemId = "101007"
+// Copy .env.example to .env and add your keys
+let kPaystackPublicKey = "YOUR_PAYSTACK_PUBLIC_KEY"
+let kFlutterwavePublicKey = "YOUR_FLUTTERWAVE_PUBLIC_KEY"
+let kRazorpayKeyId = "YOUR_RAZORPAY_KEY_ID"
+let kMonnifyApiKey = "YOUR_MONNIFY_API_KEY"
+let kMonnifyContractCode = "YOUR_MONNIFY_CONTRACT_CODE"
+let kInterswitchMerchantCode = "YOUR_INTERSWITCH_MERCHANT_CODE"
+let kInterswitchPayItemId = "YOUR_INTERSWITCH_PAY_ITEM_ID"
 let kInterswitchRedirectUrl = "https://localhost"
 
 let scenarios: [Scenario] = [
