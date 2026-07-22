@@ -19,7 +19,7 @@ struct Scenario: Identifiable, Hashable {
     let method: String?
     let channels: [String]?
     let paymentOptions: String?
-    let metadata: [String: String]?
+    let extra: [String: Any]?
 
     init(
         id: String,
@@ -32,7 +32,7 @@ struct Scenario: Identifiable, Hashable {
         method: String? = nil,
         channels: [String]? = nil,
         paymentOptions: String? = nil,
-        metadata: [String: String]? = nil
+        extra: [String: Any]? = nil
     ) {
         self.id = id
         self.label = label
@@ -44,7 +44,7 @@ struct Scenario: Identifiable, Hashable {
         self.method = method
         self.channels = channels
         self.paymentOptions = paymentOptions
-        self.metadata = metadata
+        self.extra = extra
     }
 
     static func == (lhs: Scenario, rhs: Scenario) -> Bool { lhs.id == rhs.id }
@@ -139,7 +139,7 @@ let scenarios: [Scenario] = [
         provider: monnifyProvider,
         publicKey: kMonnifyApiKey,
         currency: "NGN",
-        metadata: ["contractCode": kMonnifyContractCode, "isTestMode": "true"]
+        extra: ["contractCode": kMonnifyContractCode, "isTestMode": true]
     ),
     Scenario(
         id: "monnify-card-only",
@@ -149,7 +149,7 @@ let scenarios: [Scenario] = [
         provider: monnifyProvider,
         publicKey: kMonnifyApiKey,
         currency: "NGN",
-        metadata: ["contractCode": kMonnifyContractCode, "isTestMode": "true", "paymentMethods": "CARD"]
+        extra: ["contractCode": kMonnifyContractCode, "isTestMode": true, "paymentMethods": ["CARD"]]
     ),
     Scenario(
         id: "monnify-bank-transfer",
@@ -159,7 +159,7 @@ let scenarios: [Scenario] = [
         provider: monnifyProvider,
         publicKey: kMonnifyApiKey,
         currency: "NGN",
-        metadata: ["contractCode": kMonnifyContractCode, "isTestMode": "true", "paymentMethods": "ACCOUNT_TRANSFER"]
+        extra: ["contractCode": kMonnifyContractCode, "isTestMode": true, "paymentMethods": ["ACCOUNT_TRANSFER"]]
     ),
 
     // ── Interswitch ───────────────────────────────────────────
@@ -171,7 +171,7 @@ let scenarios: [Scenario] = [
         provider: interswitchProvider,
         publicKey: kInterswitchMerchantCode,
         currency: "NGN",
-        metadata: ["payItemId": kInterswitchPayItemId, "siteRedirectUrl": kInterswitchRedirectUrl]
+        extra: ["payItemId": kInterswitchPayItemId, "siteRedirectUrl": kInterswitchRedirectUrl]
     ),
 ]
 
@@ -194,9 +194,9 @@ struct ContentView: View {
             currency: selectedScenario.currency,
             customer: CheckoutCustomer(email: email),
             channels: selectedScenario.channels,
-            metadata: selectedScenario.metadata,
             paymentOptions: selectedScenario.paymentOptions,
-            method: selectedScenario.method
+            method: selectedScenario.method,
+            extra: selectedScenario.extra
         )
     }
 
