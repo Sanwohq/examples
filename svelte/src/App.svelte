@@ -1,12 +1,5 @@
-<script lang="ts">
-  import "./app.css";
-  import { paystackProvider } from "@sanwohq/paystack";
-  import { flutterwaveProvider } from "@sanwohq/flutterwave";
-  import { razorpayProvider } from "@sanwohq/razorpay";
-  import { monnifyProvider } from "@sanwohq/monnify";
-  import { interswitchProvider } from "@sanwohq/interswitch";
+<script context="module" lang="ts">
   import type { SanwoProviderDefinition } from "@sanwohq/svelte";
-  import CheckoutForm from "./CheckoutForm.svelte";
 
   export interface ScenarioConfig {
     id: string;
@@ -18,6 +11,16 @@
     currency: string;
     sanwoProviderOptions: Record<string, unknown>;
   }
+</script>
+
+<script lang="ts">
+  import "./app.css";
+  import { paystackProvider } from "@sanwohq/paystack";
+  import { flutterwaveProvider } from "@sanwohq/flutterwave";
+  import { razorpayProvider } from "@sanwohq/razorpay";
+  import { monnifyProvider } from "@sanwohq/monnify";
+  import { interswitchProvider } from "@sanwohq/interswitch";
+  import CheckoutForm from "./CheckoutForm.svelte";
 
   const SCENARIOS: ScenarioConfig[] = [
     // -- Paystack --
