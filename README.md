@@ -10,7 +10,7 @@ Working example apps using the [Sanwo payment SDK](https://github.com/Sanwohq/co
 | [react](./react) | Vite + React + TypeScript | `@sanwohq/react` |
 | [nextjs](./nextjs) | Next.js 14 (App Router) | `@sanwohq/web` |
 | [vue](./vue) | Vite + Vue 3 + TypeScript | `@sanwohq/vue` |
-| [angular](./angular) | Angular 18 | `@sanwohq/angular` |
+| [angular](./angular) | Angular 18 | `@sanwohq/web` |
 | [svelte](./svelte) | Vite + Svelte 4 | `@sanwohq/svelte` |
 | [react-native](./react-native) | React Native CLI | `@sanwohq/react-native` |
 | [flutter](./flutter) | Flutter + Dart | `sanwo_flutter` |
