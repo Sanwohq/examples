@@ -16,6 +16,7 @@
     "@sanwohq/paystack": "latest",
     "@sanwohq/razorpay": "latest",
     "@sanwohq/types": "latest",
+    "@sanwohq/vue": "latest",
     "@sanwohq/web": "latest",
     "vue": "^3.5.0"
   },

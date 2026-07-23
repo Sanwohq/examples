@@ -1,0 +1,25 @@
+{
+  "name": "sanwo-svelte-example",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev --open",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@sanwohq/svelte": "latest",
+    "@sanwohq/web": "latest",
+    "@sanwohq/paystack": "latest",
+    "@sanwohq/flutterwave": "latest",
+    "@sanwohq/razorpay": "latest",
+    "@sanwohq/monnify": "latest",
+    "@sanwohq/interswitch": "latest"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^3.0.0",
+    "svelte": "^4.0.0",
+    "vite": "^5.0.0"
+  }
+}

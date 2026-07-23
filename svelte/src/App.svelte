@@ -1,0 +1,170 @@
+<script lang="ts">
+  import "./app.css";
+  import { paystackProvider } from "@sanwohq/paystack";
+  import { flutterwaveProvider } from "@sanwohq/flutterwave";
+  import { razorpayProvider } from "@sanwohq/razorpay";
+  import { monnifyProvider } from "@sanwohq/monnify";
+  import { interswitchProvider } from "@sanwohq/interswitch";
+  import type { SanwoProviderDefinition } from "@sanwohq/svelte";
+  import CheckoutForm from "./CheckoutForm.svelte";
+
+  export interface ScenarioConfig {
+    id: string;
+    label: string;
+    description: string;
+    group: string;
+    provider: SanwoProviderDefinition;
+    publicKey: string;
+    currency: string;
+    sanwoProviderOptions: Record<string, unknown>;
+  }
+
+  const SCENARIOS: ScenarioConfig[] = [
+    // -- Paystack --
+    {
+      id: "paystack-checkout",
+      label: "Paystack — Checkout",
+      description: "Standard Paystack checkout popup",
+      group: "Paystack",
+      provider: paystackProvider,
+      publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY ?? "",
+      currency: "NGN",
+      sanwoProviderOptions: { method: "checkout" },
+    },
+    {
+      id: "paystack-new-transaction",
+      label: "Paystack — New Transaction",
+      description: "Paystack new transaction flow",
+      group: "Paystack",
+      provider: paystackProvider,
+      publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY ?? "",
+      currency: "NGN",
+      sanwoProviderOptions: { method: "newTransaction" },
+    },
+    {
+      id: "paystack-card-only",
+      label: "Paystack — Card Only",
+      description: "Paystack checkout limited to card payments",
+      group: "Paystack",
+      provider: paystackProvider,
+      publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY ?? "",
+      currency: "NGN",
+      sanwoProviderOptions: { method: "checkout", channels: ["card"] },
+    },
+    {
+      id: "paystack-bank-transfer",
+      label: "Paystack — Bank Transfer",
+      description: "Paystack checkout limited to bank transfer",
+      group: "Paystack",
+      provider: paystackProvider,
+      publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY ?? "",
+      currency: "NGN",
+      sanwoProviderOptions: { method: "checkout", channels: ["bank_transfer"] },
+    },
+
+    // -- Flutterwave --
+    {
+      id: "flutterwave-standard",
+      label: "Flutterwave — Standard",
+      description: "Standard Flutterwave checkout",
+      group: "Flutterwave",
+      provider: flutterwaveProvider,
+      publicKey: import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY ?? "",
+      currency: "NGN",
+      sanwoProviderOptions: {},
+    },
+    {
+      id: "flutterwave-card-only",
+      label: "Flutterwave — Card Only",
+      description: "Flutterwave checkout limited to card payments",
+      group: "Flutterwave",
+      provider: flutterwaveProvider,
+      publicKey: import.meta.env.VITE_FLUTTERWAVE_PUBLIC_KEY ?? "",
+      currency: "NGN",
+      sanwoProviderOptions: { paymentOptions: "card" },
+    },
+
+    // -- Razorpay --
+    {
+      id: "razorpay-standard",
+      label: "Razorpay — Standard",
+      description: "Standard Razorpay checkout",
+      group: "Razorpay",
+      provider: razorpayProvider,
+      publicKey: import.meta.env.VITE_RAZORPAY_KEY_ID ?? "",
+      currency: "INR",
+      sanwoProviderOptions: {},
+    },
+
+    // -- Monnify --
+    {
+      id: "monnify-standard",
+      label: "Monnify — Standard",
+      description: "Standard Monnify checkout",
+      group: "Monnify",
+      provider: monnifyProvider,
+      publicKey: import.meta.env.VITE_MONNIFY_API_KEY ?? "",
+      currency: "NGN",
+      sanwoProviderOptions: {
+        contractCode: import.meta.env.VITE_MONNIFY_CONTRACT_CODE ?? "",
+        isTestMode: true,
+      },
+    },
+    {
+      id: "monnify-card-only",
+      label: "Monnify — Card Only",
+      description: "Monnify checkout limited to card payments",
+      group: "Monnify",
+      provider: monnifyProvider,
+      publicKey: import.meta.env.VITE_MONNIFY_API_KEY ?? "",
+      currency: "NGN",
+      sanwoProviderOptions: {
+        contractCode: import.meta.env.VITE_MONNIFY_CONTRACT_CODE ?? "",
+        isTestMode: true,
+        paymentMethods: ["CARD"],
+      },
+    },
+    {
+      id: "monnify-bank-transfer",
+      label: "Monnify — Bank Transfer Only",
+      description: "Monnify checkout limited to bank transfer",
+      group: "Monnify",
+      provider: monnifyProvider,
+      publicKey: import.meta.env.VITE_MONNIFY_API_KEY ?? "",
+      currency: "NGN",
+      sanwoProviderOptions: {
+        contractCode: import.meta.env.VITE_MONNIFY_CONTRACT_CODE ?? "",
+        isTestMode: true,
+        paymentMethods: ["ACCOUNT_TRANSFER"],
+      },
+    },
+
+    // -- Interswitch --
+    {
+      id: "interswitch-standard",
+      label: "Interswitch — Standard",
+      description: "Standard Interswitch checkout",
+      group: "Interswitch",
+      provider: interswitchProvider,
+      publicKey: import.meta.env.VITE_INTERSWITCH_MERCHANT_CODE ?? "",
+      currency: "NGN",
+      sanwoProviderOptions: {
+        payItemId: import.meta.env.VITE_INTERSWITCH_PAY_ITEM_ID ?? "",
+        siteRedirectUrl: typeof window !== "undefined" ? window.location.href : "",
+      },
+    },
+  ];
+
+  let selectedId = SCENARIOS[0].id;
+
+  $: selected = SCENARIOS.find((s) => s.id === selectedId) ?? SCENARIOS[0];
+</script>
+
+{#key selected.id}
+  <CheckoutForm
+    scenarios={SCENARIOS}
+    {selectedId}
+    {selected}
+    on:scenarioChange={(e) => (selectedId = e.detail)}
+  />
+{/key}
