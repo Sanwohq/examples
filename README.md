@@ -16,6 +16,7 @@ Working example apps using the [Sanwo payment SDK](https://github.com/Sanwohq/co
 | [flutter](./flutter) | Flutter + Dart | `sanwo_flutter` |
 | [android](./android) | Android + Kotlin | `com.github.Sanwohq.android` |
 | [ios](./ios) | SwiftUI (iOS 15+) | `Sanwo` (SPM) |
+| [embed](./embed) | No-code / Any HTML page | `@sanwohq/embed` |
 
 ## Getting Started
 
