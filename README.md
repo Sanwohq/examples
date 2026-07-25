@@ -16,6 +16,8 @@ Working example apps using the [Sanwo payment SDK](https://github.com/Sanwohq/co
 | [flutter](./flutter) | Flutter + Dart | `sanwo_flutter` |
 | [android](./android) | Android + Kotlin | `com.github.Sanwohq.android` |
 | [ios](./ios) | SwiftUI (iOS 15+) | `Sanwo` (SPM) |
+| [laravel](./laravel) | Laravel (Blade) | `sanwohq/laravel` |
+| [dotnet](./dotnet) | ASP.NET (Razor Pages) | `SanwoHQ` |
 | [embed](./embed) | No-code / Any HTML page | `@sanwohq/embed` |
 
 ## Getting Started
@@ -61,3 +63,5 @@ All examples demonstrate these 5 providers: Paystack, Flutterwave, Razorpay, Mon
 - **Flutter**: Flutter SDK 3.10+
 - **Android**: Android Studio, JDK 17
 - **iOS**: Xcode 15+, iOS 15+
+- **Laravel**: PHP 8.1+, Composer
+- **.NET**: .NET 8.0 or 9.0 SDK
