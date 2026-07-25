@@ -8,194 +8,233 @@
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5; color: #333; min-height: 100vh; padding: 40px 20px;
+            background: #f5f5f5; color: #333; min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
         }
-        .container { max-width: 800px; margin: 0 auto; }
-        h1 { font-size: 1.75rem; margin-bottom: 8px; }
-        p.subtitle { color: #666; font-size: 0.95rem; margin-bottom: 32px; }
-        .card {
+        .container {
             background: #fff; border-radius: 12px;
-            box-shadow: 0 2px 16px rgba(0,0,0,0.08); padding: 32px; margin-bottom: 24px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.08); padding: 40px;
+            width: 100%; max-width: 460px;
         }
-        .card h2 { font-size: 1.15rem; margin-bottom: 4px; }
-        .card p { color: #666; font-size: 0.85rem; margin-bottom: 20px; }
-        .sanwo-button {
-            display: inline-flex; align-items: center; gap: 8px;
-            padding: 12px 24px; background: #4f46e5; color: #fff; border: none;
-            border-radius: 8px; font-size: 1rem; font-weight: 600;
-            cursor: pointer; transition: background 0.2s; margin-right: 12px; margin-bottom: 8px;
+        h1 { font-size: 1.5rem; margin-bottom: 8px; }
+        p.subtitle { color: #666; font-size: 0.9rem; margin-bottom: 24px; }
+        label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; color: #444; }
+        select, input {
+            width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px;
+            font-size: 1rem; margin-bottom: 16px; transition: border-color 0.2s; background: #fff;
         }
-        .sanwo-button:hover { background: #4338ca; }
-        .sanwo-button.flutterwave { background: #f5a623; }
-        .sanwo-button.flutterwave:hover { background: #e09400; }
-        .sanwo-button.monnify { background: #0b6e4f; }
-        .sanwo-button.monnify:hover { background: #095a40; }
-        .code-block {
-            background: #1e1e2e; color: #cdd6f4; border-radius: 8px;
-            padding: 16px 20px; font-family: 'SF Mono', Monaco, Consolas, monospace;
-            font-size: 0.8rem; line-height: 1.6; overflow-x: auto; margin-top: 16px; white-space: pre;
+        select:focus, input:focus { outline: none; border-color: #4f46e5; }
+        .scenario-desc { font-size: 0.8rem; color: #888; margin: -12px 0 16px; line-height: 1.4; }
+        button {
+            width: 100%; padding: 12px; background: #4f46e5; color: #fff; border: none;
+            border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s;
         }
-        #result-log {
-            margin-top: 32px; padding: 20px; background: #fff;
-            border-radius: 12px; box-shadow: 0 2px 16px rgba(0,0,0,0.08);
-        }
-        #result-log h2 { font-size: 1rem; margin-bottom: 12px; }
-        #log-entries { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 0.8rem; color: #666; }
-        #log-entries .entry { padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
-        #log-entries .entry:last-child { border-bottom: none; }
-        .entry.success { color: #065f46; }
-        .entry.cancelled { color: #92400e; }
-        .entry.error { color: #991b1b; }
+        button:hover { background: #4338ca; }
+        button:disabled { background: #a5b4fc; cursor: not-allowed; }
+        #result { margin-top: 20px; padding: 14px; border-radius: 8px; font-size: 0.9rem; display: none; }
+        #result.success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+        #result.cancelled { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+        #result.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+        #result.pending { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+        optgroup { font-weight: 700; color: #333; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Sanwo Payment</h1>
-        <p class="subtitle">Laravel Blade components — all providers and scenarios</p>
+        <p class="subtitle">Laravel example — all providers and scenarios</p>
 
-        {{-- Example 1: Paystack checkout --}}
-        <div class="card">
-            <h2>1. Paystack Checkout</h2>
-            <p>Uses the default provider from config/sanwo.php. Just pass amount and email.</p>
+        <form id="payment-form">
+            <label for="scenario">Payment Scenario</label>
+            <select id="scenario" required>
+                <optgroup label="Paystack">
+                    <option value="paystack-checkout">Paystack — Checkout (default)</option>
+                    <option value="paystack-new-transaction">Paystack — New Transaction</option>
+                    <option value="paystack-card-only">Paystack — Card Only</option>
+                    <option value="paystack-bank-transfer">Paystack — Bank Transfer</option>
+                </optgroup>
+                <optgroup label="Flutterwave">
+                    <option value="flutterwave-standard">Flutterwave — Standard</option>
+                    <option value="flutterwave-card-only">Flutterwave — Card Only</option>
+                </optgroup>
+                <optgroup label="Monnify">
+                    <option value="monnify-standard">Monnify — Standard</option>
+                    <option value="monnify-card-only">Monnify — Card Only</option>
+                    <option value="monnify-transfer-only">Monnify — Bank Transfer Only</option>
+                </optgroup>
+                <optgroup label="Interswitch">
+                    <option value="interswitch-standard">Interswitch — Standard</option>
+                </optgroup>
+            </select>
+            <p class="scenario-desc" id="scenario-desc">Default Paystack popup checkout flow.</p>
 
-            <x-sanwo-checkout
-                amount="500000"
-                email="customer@example.com"
-                button-text="Pay ₦5,000 with Paystack"
-                callback="onPaymentComplete"
-            />
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="customer@example.com" required />
 
-            <div class="code-block">&lt;x-sanwo-checkout
-    amount="500000"
-    email="customer@example.com"
-    button-text="Pay ₦5,000 with Paystack"
-    callback="onPaymentComplete"
-/&gt;</div>
-        </div>
+            <label for="amount">Amount (<span id="currency-label">NGN</span>)</label>
+            <input type="number" id="amount" placeholder="1000" min="1" step="1" required />
 
-        {{-- Example 2: Flutterwave checkout (override provider) --}}
-        <div class="card">
-            <h2>2. Flutterwave Checkout</h2>
-            <p>Override the provider and public key per-button.</p>
+            <button type="submit" id="pay-btn">Pay with Paystack</button>
+        </form>
 
-            <x-sanwo-checkout
-                amount="250000"
-                email="customer@example.com"
-                provider="flutterwave"
-                public-key="{{ env('FLUTTERWAVE_PUBLIC_KEY', 'FLWPUBK_TEST-xxxxx') }}"
-                button-text="Pay ₦2,500 with Flutterwave"
-                button-class="sanwo-button flutterwave"
-                callback="onPaymentComplete"
-            />
-
-            <div class="code-block">&lt;x-sanwo-checkout
-    amount="250000"
-    email="customer@example.com"
-    provider="flutterwave"
-    public-key="FLWPUBK_TEST-xxxxx"
-    button-text="Pay ₦2,500 with Flutterwave"
-    callback="onPaymentComplete"
-/&gt;</div>
-        </div>
-
-        {{-- Example 3: Monnify checkout --}}
-        <div class="card">
-            <h2>3. Monnify Checkout</h2>
-            <p>Another provider override — demonstrates Monnify integration.</p>
-
-            <x-sanwo-checkout
-                amount="100000"
-                email="customer@example.com"
-                provider="monnify"
-                public-key="{{ env('MONNIFY_API_KEY', 'MK_TEST_xxxxx') }}"
-                button-text="Pay ₦1,000 with Monnify"
-                button-class="sanwo-button monnify"
-                callback="onPaymentComplete"
-            />
-        </div>
-
-        {{-- Example 4: Custom amount (donation) --}}
-        <div class="card">
-            <h2>4. Custom Amount (Donation)</h2>
-            <p>Let users enter their own amount — great for donations and tips.</p>
-
-            <x-sanwo-custom-amount
-                email="donor@example.com"
-                button-text="Donate"
-                placeholder="How much would you like to give?"
-                min-amount="500"
-                max-amount="1000000"
-                callback="onPaymentComplete"
-            />
-
-            <div class="code-block">&lt;x-sanwo-custom-amount
-    email="donor@example.com"
-    button-text="Donate"
-    placeholder="How much would you like to give?"
-    min-amount="500"
-    max-amount="1000000"
-    callback="onPaymentComplete"
-/&gt;</div>
-        </div>
-
-        {{-- Example 5: Custom amount without email (shows email input) --}}
-        <div class="card">
-            <h2>5. Custom Amount + Email Input</h2>
-            <p>Omit the email prop — Sanwo shows an email field automatically.</p>
-
-            <x-sanwo-custom-amount
-                button-text="Pay"
-                placeholder="Enter amount"
-                callback="onPaymentComplete"
-            />
-
-            <div class="code-block">&lt;x-sanwo-custom-amount
-    button-text="Pay"
-    placeholder="Enter amount"
-    callback="onPaymentComplete"
-/&gt;</div>
-        </div>
-
-        {{-- Result log --}}
-        <div id="result-log">
-            <h2>Event Log</h2>
-            <div id="log-entries">
-                <div class="entry">Waiting for payment events...</div>
-            </div>
-        </div>
+        <div id="result"></div>
     </div>
 
-    {{-- Load Sanwo embed script --}}
     <x-sanwo-scripts />
 
     <script>
-        var logEl = document.getElementById('log-entries');
-
-        function addLog(message, type) {
-            var entry = document.createElement('div');
-            entry.className = 'entry ' + (type || '');
-            entry.textContent = new Date().toLocaleTimeString() + ' — ' + message;
-            logEl.insertBefore(entry, logEl.firstChild);
-        }
-
-        function onPaymentComplete(result) {
-            if (result.status === 'successful') {
-                addLog('Payment successful! Ref: ' + result.reference, 'success');
-            } else if (result.status === 'cancelled') {
-                addLog('Payment cancelled by user.', 'cancelled');
-            } else if (result.status === 'pending') {
-                addLog('Payment pending. Ref: ' + result.reference, 'cancelled');
-            } else {
-                addLog('Payment ' + result.status, 'error');
+        var scenarios = {
+            'paystack-checkout': {
+                provider: 'paystack',
+                publicKey: '{{ env("SANWO_PUBLIC_KEY", "pk_test_xxxxx") }}',
+                currency: 'NGN', label: 'Paystack',
+                description: 'Default Paystack popup checkout flow.',
+                sanwoProviderOptions: { method: 'checkout' }
+            },
+            'paystack-new-transaction': {
+                provider: 'paystack',
+                publicKey: '{{ env("SANWO_PUBLIC_KEY", "pk_test_xxxxx") }}',
+                currency: 'NGN', label: 'Paystack',
+                description: 'Uses newTransaction method.',
+                sanwoProviderOptions: { method: 'newTransaction' }
+            },
+            'paystack-card-only': {
+                provider: 'paystack',
+                publicKey: '{{ env("SANWO_PUBLIC_KEY", "pk_test_xxxxx") }}',
+                currency: 'NGN', label: 'Paystack',
+                description: 'Only card payments allowed.',
+                sanwoProviderOptions: { method: 'checkout', channels: ['card'] }
+            },
+            'paystack-bank-transfer': {
+                provider: 'paystack',
+                publicKey: '{{ env("SANWO_PUBLIC_KEY", "pk_test_xxxxx") }}',
+                currency: 'NGN', label: 'Paystack',
+                description: 'Only bank transfer allowed.',
+                sanwoProviderOptions: { method: 'checkout', channels: ['bank_transfer'] }
+            },
+            'flutterwave-standard': {
+                provider: 'flutterwave',
+                publicKey: '{{ env("FLUTTERWAVE_PUBLIC_KEY", "FLWPUBK_TEST-xxxxx") }}',
+                currency: 'NGN', label: 'Flutterwave',
+                description: 'Standard Flutterwave checkout with all payment options.',
+                sanwoProviderOptions: {}
+            },
+            'flutterwave-card-only': {
+                provider: 'flutterwave',
+                publicKey: '{{ env("FLUTTERWAVE_PUBLIC_KEY", "FLWPUBK_TEST-xxxxx") }}',
+                currency: 'NGN', label: 'Flutterwave',
+                description: 'Card-only payments.',
+                sanwoProviderOptions: { paymentOptions: 'card' }
+            },
+            'monnify-standard': {
+                provider: 'monnify',
+                publicKey: '{{ env("MONNIFY_API_KEY", "MK_TEST_xxxxx") }}',
+                currency: 'NGN', label: 'Monnify',
+                description: 'Standard Monnify checkout with card and bank transfer.',
+                sanwoProviderOptions: {
+                    contractCode: '{{ env("MONNIFY_CONTRACT_CODE", "2403120008") }}',
+                    isTestMode: true
+                }
+            },
+            'monnify-card-only': {
+                provider: 'monnify',
+                publicKey: '{{ env("MONNIFY_API_KEY", "MK_TEST_xxxxx") }}',
+                currency: 'NGN', label: 'Monnify',
+                description: 'Only card payments.',
+                sanwoProviderOptions: {
+                    contractCode: '{{ env("MONNIFY_CONTRACT_CODE", "2403120008") }}',
+                    isTestMode: true, paymentMethods: ['CARD']
+                }
+            },
+            'monnify-transfer-only': {
+                provider: 'monnify',
+                publicKey: '{{ env("MONNIFY_API_KEY", "MK_TEST_xxxxx") }}',
+                currency: 'NGN', label: 'Monnify',
+                description: 'Bank transfer only.',
+                sanwoProviderOptions: {
+                    contractCode: '{{ env("MONNIFY_CONTRACT_CODE", "2403120008") }}',
+                    isTestMode: true, paymentMethods: ['ACCOUNT_TRANSFER']
+                }
+            },
+            'interswitch-standard': {
+                provider: 'interswitch',
+                publicKey: '{{ env("INTERSWITCH_MERCHANT_CODE", "MX007") }}',
+                currency: 'NGN', label: 'Interswitch',
+                description: 'Standard Interswitch Webpay checkout.',
+                sanwoProviderOptions: {
+                    payItemId: '{{ env("INTERSWITCH_PAY_ITEM_ID", "101007") }}',
+                    siteRedirectUrl: window.location.href
+                }
             }
+        };
+
+        var form = document.getElementById('payment-form');
+        var scenarioSelect = document.getElementById('scenario');
+        var scenarioDesc = document.getElementById('scenario-desc');
+        var currencyLabel = document.getElementById('currency-label');
+        var payBtn = document.getElementById('pay-btn');
+        var resultDiv = document.getElementById('result');
+
+        function updateUI() {
+            var config = scenarios[scenarioSelect.value];
+            currencyLabel.textContent = config.currency;
+            scenarioDesc.textContent = config.description;
+            payBtn.textContent = 'Pay with ' + config.label;
         }
 
-        document.addEventListener('sanwo:complete', function(e) {
-            addLog('sanwo:complete event — status: ' + e.detail.status);
-        });
+        scenarioSelect.addEventListener('change', updateUI);
+        updateUI();
 
-        document.addEventListener('sanwo:error', function(e) {
-            addLog('sanwo:error event — ' + e.detail.message, 'error');
+        function showResult(type, message) {
+            resultDiv.className = type;
+            resultDiv.textContent = message;
+            resultDiv.style.display = 'block';
+        }
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            var email = document.getElementById('email').value;
+            var amountInput = parseFloat(document.getElementById('amount').value);
+            if (!email || !amountInput) return;
+
+            var config = scenarios[scenarioSelect.value];
+            var sanwo = Sanwo.create({
+                provider: config.provider,
+                publicKey: config.publicKey,
+                debug: true
+            });
+
+            var amount = Math.round(amountInput * 100);
+
+            payBtn.disabled = true;
+            payBtn.textContent = 'Processing...';
+            resultDiv.style.display = 'none';
+
+            try {
+                var result = await sanwo.checkout({
+                    amount: amount,
+                    currency: config.currency,
+                    customer: { email: email },
+                    description: 'Sanwo example payment',
+                    sanwoProviderOptions: config.sanwoProviderOptions
+                });
+
+                if (result.status === 'successful') {
+                    showResult('success', 'Payment successful! Reference: ' + result.reference);
+                } else if (result.status === 'cancelled') {
+                    showResult('cancelled', 'Payment was cancelled.');
+                } else if (result.status === 'pending') {
+                    showResult('pending', 'Payment is pending. Reference: ' + result.reference);
+                } else {
+                    showResult('error', 'Payment failed. Status: ' + result.status);
+                }
+            } catch (error) {
+                showResult('error', 'Payment failed: ' + error.message);
+            } finally {
+                payBtn.disabled = false;
+                updateUI();
+            }
         });
     </script>
 </body>
