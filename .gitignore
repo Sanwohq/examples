@@ -34,3 +34,12 @@ android/app/src/main/kotlin/com/example/sanwocheckout/Config.kt
 flutter/.env
 */environments/environment.ts
 .angular
+
+# Laravel
+laravel/.env
+laravel/vendor/
+
+# .NET
+dotnet/appsettings.Development.json
+dotnet/bin/
+dotnet/obj/
