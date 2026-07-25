@@ -14,7 +14,7 @@ cd SanwoExample
 ### 2. Install the Sanwo package
 
 ```bash
-dotnet add package SanwoHQ
+dotnet add package Sanwo
 ```
 
 ### 3. Copy the example files

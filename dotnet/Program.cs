@@ -1,4 +1,4 @@
-using SanwoHQ;
+using Sanwo;
 
 var builder = WebApplication.CreateBuilder(args);
 
