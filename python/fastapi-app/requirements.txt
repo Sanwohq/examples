@@ -1,0 +1,4 @@
+fastapi
+uvicorn[standard]
+sanwo[fastapi]
+python-dotenv

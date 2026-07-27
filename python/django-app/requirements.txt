@@ -1,0 +1,3 @@
+django
+sanwo[django]
+python-dotenv

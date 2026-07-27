@@ -17,7 +17,7 @@ Working example apps using the [Sanwo payment SDK](https://github.com/Sanwohq/co
 | [android](./android) | Android + Kotlin | `com.github.Sanwohq.android` |
 | [ios](./ios) | SwiftUI (iOS 15+) | `Sanwo` (SPM) |
 | [laravel](./laravel) | Laravel (Blade) | `sanwohq/laravel` |
-| [dotnet](./dotnet) | ASP.NET (Razor Pages) | `SanwoHQ` |
+| [dotnet](./dotnet) | ASP.NET (Razor Pages) | `Sanwo` |
 | [embed](./embed) | No-code / Any HTML page | `@sanwohq/embed` |
 
 ## Getting Started
