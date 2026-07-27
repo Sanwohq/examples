@@ -27,14 +27,17 @@ sanwo.init_templates(templates)
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    return templates.TemplateResponse("sanwo.html", {
-        "request": request,
-        "flutterwave_key": os.environ.get("FLUTTERWAVE_PUBLIC_KEY", "FLWPUBK_TEST-xxxxx"),
-        "monnify_key": os.environ.get("MONNIFY_API_KEY", "MK_TEST_xxxxx"),
-        "monnify_contract": os.environ.get("MONNIFY_CONTRACT_CODE", "2403120008"),
-        "interswitch_merchant": os.environ.get("INTERSWITCH_MERCHANT_CODE", "MX007"),
-        "interswitch_pay_item": os.environ.get("INTERSWITCH_PAY_ITEM_ID", "101007"),
-    })
+    return templates.TemplateResponse(
+        request,
+        "sanwo.html",
+        context={
+            "flutterwave_key": os.environ.get("FLUTTERWAVE_PUBLIC_KEY", "FLWPUBK_TEST-xxxxx"),
+            "monnify_key": os.environ.get("MONNIFY_API_KEY", "MK_TEST_xxxxx"),
+            "monnify_contract": os.environ.get("MONNIFY_CONTRACT_CODE", "2403120008"),
+            "interswitch_merchant": os.environ.get("INTERSWITCH_MERCHANT_CODE", "MX007"),
+            "interswitch_pay_item": os.environ.get("INTERSWITCH_PAY_ITEM_ID", "101007"),
+        },
+    )
 
 
 if __name__ == "__main__":
