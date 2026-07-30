@@ -1,16 +1,20 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	sanwo "github.com/Sanwohq/go"
 )
 
 func main() {
+	loadEnv(".env")
+
 	provider := envOr("SANWO_PROVIDER", "paystack")
 	publicKey := envOr("SANWO_PUBLIC_KEY", "pk_test_09659224f31a77f7370044ad9e69dede7dd177e1")
 	currency := envOr("SANWO_CURRENCY", "NGN")
@@ -52,4 +56,24 @@ func envOr(key, fallback string) string {
 		return v
 	}
 	return fallback
+}
+
+func loadEnv(path string) {
+	f, err := os.Open(path)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		if k, v, ok := strings.Cut(line, "="); ok {
+			if os.Getenv(k) == "" {
+				os.Setenv(strings.TrimSpace(k), strings.TrimSpace(v))
+			}
+		}
+	}
 }
