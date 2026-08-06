@@ -1,0 +1,43 @@
+import type { SanwoProviderDefinition } from "@sanwohq/types";
+
+export const bachsProvider: SanwoProviderDefinition = {
+  id: "bachs",
+  name: "bachs",
+  displayName: "Bachs",
+  template: "",
+  website: "https://bachs.io",
+  documentation: "https://docs.bachs.io",
+  supportedCurrencies: [
+    "NGN",
+    "GHS",
+    "KES",
+    "USD",
+    "UGX",
+    "XAF",
+    "XOF",
+    "RWF",
+    "ZMW",
+    "TZS",
+    "CDF",
+    "EUR",
+    "GBP",
+  ],
+  supportedCountries: [
+    "NG",
+    "GH",
+    "KE",
+    "UG",
+    "CM",
+    "CI",
+    "RW",
+    "ZM",
+    "TZ",
+    "RW",
+  ],
+  paymentMethods: [
+    "card",
+    "mobile_money",
+    "bank_transfer",
+    "crypto",
+  ],
+};

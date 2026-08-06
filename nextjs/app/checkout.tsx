@@ -9,6 +9,10 @@ import { razorpayProvider } from "@sanwohq/razorpay";
 import { monnifyProvider } from "@sanwohq/monnify";
 import { interswitchProvider } from "@sanwohq/interswitch";
 import type { CheckoutResult } from "@sanwohq/types";
+import { mySquadProvider } from "@/mySquadProvider";
+import { payWithSquad } from "@/squadSDK_improv";
+import { bachsProvider } from "@/lib/bachs/provider";
+import { openBachsCheckout } from "@/lib/bachs/client";
 
 interface Scenario {
   id: string;
@@ -19,6 +23,10 @@ interface Scenario {
   publicKey: string;
   currency: string;
   sanwoProviderOptions: Record<string, unknown>;
+  /** Server-driven providers don't need a public key or the sanwo() iframe bridge. */
+  serverFlow?: boolean;
+  /** Normalize amount to minor units before sending (PAYMENT_PROVIDER.DEFAULT = true). */
+  amountInMinorUnit?: boolean;
 }
 
 const SCENARIOS: Scenario[] = [
@@ -152,8 +160,34 @@ const SCENARIOS: Scenario[] = [
     currency: "NGN",
     sanwoProviderOptions: {
       payItemId: process.env.NEXT_PUBLIC_INTERSWITCH_PAY_ITEM_ID ?? "",
-      siteRedirectUrl: typeof window !== "undefined" ? window.location.href : "",
+      siteRedirectUrl:
+        typeof window !== "undefined" ? window.location.href : "",
     },
+  },
+
+  //── Squad Checkout Flow ───────────────────────────────────────────
+  {
+    id: "squad-checkout",
+    label: "Squad Checkout",
+    group: "Squad",
+    description: "Squad Provider",
+    provider: mySquadProvider,
+    publicKey: process.env.NEXT_PUBLIC_SQUAD_PUBLIC_KEY ?? "",
+    currency: "NGN",
+    sanwoProviderOptions: {},
+  },
+
+  {
+    id: "bachs-checkout",
+    label: "Bachs — Server Checkout",
+    group: "Bachs",
+    description: "Server-initiated checkout (sk_ key), webhook-confirmed",
+    provider: bachsProvider,
+    publicKey: "",
+    currency: "NGN",
+    sanwoProviderOptions: {},
+    serverFlow: true,
+    amountInMinorUnit: false,
   },
 ];
 
@@ -172,6 +206,80 @@ function getGroups(scenarios: Scenario[]): string[] {
 
 const GROUPS = getGroups(SCENARIOS);
 
+/** Arguments a server-driven provider needs (no public key required). */
+interface ServerFlowArgs {
+  email: string;
+  currency: string;
+  majorAmount: number;
+  minorAmount: number;
+}
+
+/**
+ * Dispatches server-heavy providers that don't rely on a public key.
+ * Each provider registers its own server flow keyed by provider id.
+ * Extend this map to add more server-driven providers.
+ */
+async function runServerFlow(
+  scenario: Scenario,
+  args: ServerFlowArgs
+): Promise<CheckoutResult> {
+  switch (scenario.provider.id) {
+    case "bachs":
+      return runBachsFlow(args);
+    default:
+      throw new Error(`No server flow registered for "${scenario.provider.id}"`);
+  }
+}
+
+async function runBachsFlow({
+  email,
+  currency,
+  majorAmount,
+}: ServerFlowArgs): Promise<CheckoutResult> {
+  const res = await fetch("/api/bachs/create-checkout", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      amount: majorAmount,
+      currency,
+      email,
+    }),
+  });
+
+  const data = (await res.json()) as {
+    session?: { redirectUrl?: string };
+    error?: string;
+  };
+  if (!res.ok || !data.session?.redirectUrl) {
+    throw new Error(data.error ?? "Failed to create Bachs checkout");
+  }
+
+  const bachsResult = await openBachsCheckout({
+    checkoutUrl: data.session.redirectUrl,
+  });
+
+  if (bachsResult.status === "success") {
+    return {
+      status: "successful",
+      provider: "bachs",
+      reference: bachsResult.reference,
+      raw: {},
+    };
+  }
+  if (bachsResult.status === "cancelled") {
+    return { status: "cancelled", provider: "bachs" };
+  }
+  return {
+    status: "failed",
+    provider: "bachs",
+    error: {
+      code: "CHECKOUT_FAILED",
+      message: bachsResult.message,
+      recoverable: false,
+    },
+  };
+}
+
 export default function Checkout() {
   const [selectedId, setSelectedId] = useState(SCENARIOS[0].id);
   const [email, setEmail] = useState("");
@@ -182,6 +290,10 @@ export default function Checkout() {
   const selected = SCENARIOS.find((s) => s.id === selectedId) ?? SCENARIOS[0];
 
   const sanwo = useMemo(() => {
+    if (selected.serverFlow) {
+      return null;
+    }
+
     const instance = createSanwo({
       provider: selected.provider,
       publicKey: selected.publicKey,
@@ -203,25 +315,69 @@ export default function Checkout() {
     setLoading(true);
     setResult(null);
 
-    try {
-      const checkoutResult = await sanwo({
-        amount: Math.round(parseFloat(amount) * 100),
-        currency: selected.currency,
-        customer: { email },
-        description: "Sanwo example payment",
-        onLoad: () => console.log("Sanwo: onLoad callback fired"),
-        onError: (err) => console.log("Sanwo: onError callback fired", err),
-        ...(Object.keys(selected.sanwoProviderOptions).length > 0 && {
-          sanwoProviderOptions: selected.sanwoProviderOptions,
-        }),
-      });
+    const majorAmount = parseFloat(amount);
+    const minorAmount = Math.round(majorAmount * 100);
 
-      setResult(checkoutResult);
+    try {
+      let result: CheckoutResult;
+
+      if (selected.serverFlow) {
+        // Server-driven providers (no public key, no sanwo() iframe bridge).
+        result = await runServerFlow(selected, {
+          email,
+          currency: selected.currency,
+          majorAmount,
+          minorAmount,
+        });
+      } else if (selected.provider.id === "squad") {
+        const squadResult = await payWithSquad({
+          publicKey: selected.publicKey,
+          email,
+          amount: minorAmount,
+          currency: selected.currency,
+        });
+        result =
+          squadResult.status === "success"
+            ? {
+                status: "successful",
+                provider: "squad",
+                reference: squadResult.reference,
+                raw: {},
+              }
+            : squadResult.status === "cancelled"
+              ? { status: "cancelled", provider: "squad" }
+              : {
+                  status: "failed",
+                  provider: "squad",
+                  error: {
+                    code: "CHECKOUT_FAILED",
+                    message: squadResult.message,
+                    recoverable: false,
+                  },
+                };
+      } else {
+        if (!sanwo) {
+          throw new Error("Checkout instance not initialized");
+        }
+        result = await sanwo({
+          amount: minorAmount,
+          currency: selected.currency,
+          customer: { email },
+          description: "Sanwo example payment",
+          onLoad: () => console.log("Sanwo: onLoad callback fired"),
+          onError: (err) => console.log("Sanwo: onError callback fired", err),
+          ...(Object.keys(selected.sanwoProviderOptions).length > 0 && {
+            sanwoProviderOptions: selected.sanwoProviderOptions,
+          }),
+        });
+      }
+
+      setResult(result);
     } catch (err) {
       console.error("Payment error:", err);
       setResult({
         status: "failed",
-        provider: selected.group.toLowerCase(),
+        provider: selected.provider.id,
         error: {
           code: "CHECKOUT_FAILED",
           message: err instanceof Error ? err.message : "Payment failed",
