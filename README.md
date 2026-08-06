@@ -56,6 +56,8 @@ const result = await sanwo({
 
 All examples demonstrate these 5 providers: Paystack, Flutterwave, Razorpay, Monnify, Interswitch.
 
+The Next.js example additionally demonstrates **Squad** (direct widget integration) and **Bachs** (server-initiated checkout with webhook confirmation). Bachs requires a secret key on the server, so it ships with API routes under `nextjs/app/api/`.
+
 ## Requirements
 
 - **Web examples**: Node.js 22+
